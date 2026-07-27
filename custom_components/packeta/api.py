@@ -32,6 +32,7 @@ class PacketaApiError(Exception):
     """Raised when a Packeta API call returns an unexpected response."""
 
     def __init__(self, detail: str) -> None:
+        """Store the status code that triggered the error."""
         super().__init__(f"Packeta API request failed: {detail}")
         self.detail = detail
 
