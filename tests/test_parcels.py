@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.packeta import parcels as parcels_module
 from custom_components.packeta.const import (
     CONF_DELIVERED_FILTER_AMOUNT,
     CONF_DELIVERED_FILTER_TYPE,
@@ -71,6 +72,24 @@ def test_unmapped_status_warns_only_once(caplog):
     assert map_parcel_status("ABDUCTED") == ParcelStatus.UNKNOWN
     assert caplog.text.count("ABDUCTED") == 1
     assert "issues/new" in caplog.text
+
+
+def test_unparsed_event_time_warns_once(caplog):
+    """An event time we cannot parse is flagged once — the format is an open
+    question that decides delivered-at and ordering — with an issue link."""
+    parcels_module._unparsed_time_logged = False
+    events = [event("Handed over", "31-07-2026 10:00")]
+    build_history(events)
+    build_history(events)
+    assert caplog.text.count("did not parse") == 1
+    assert "issues/new" in caplog.text
+
+
+def test_parseable_event_time_is_silent(caplog):
+    """An ISO event time logs nothing."""
+    parcels_module._unparsed_time_logged = False
+    build_history([event("Handed over", "2026-07-31T10:00:00Z")])
+    assert "did not parse" not in caplog.text
 
 
 # ---------------------------------------------------------------------------

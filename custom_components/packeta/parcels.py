@@ -166,6 +166,28 @@ def format_dimensions(
     }
 
 
+# Packeta's event ``time`` is a string whose exact format is unconfirmed (see
+# TODO.md). When a real event carries a ``time`` we cannot parse, ``delivered_at``
+# and event ordering silently fall back — so we log it once so a tester can
+# report the real format and we can adjust the parsing. See NEW_ISSUE_URL.
+_unparsed_time_logged = False
+
+
+def _note_unparsed_time(value: Any) -> None:
+    """One-shot: flag an event time we could not parse (format is unconfirmed)."""
+    global _unparsed_time_logged
+    if _unparsed_time_logged:
+        return
+    _unparsed_time_logged = True
+    _LOGGER.warning(
+        "Packeta event time %r did not parse — the format is unconfirmed, so "
+        "delivered-at and event ordering may be off. Please report it so we can "
+        "fix the parsing (a diagnostics file is ideal): %s",
+        value,
+        NEW_ISSUE_URL,
+    )
+
+
 def build_history(
     events: list | None, *, max_events: int = HISTORY_MAX_EVENTS
 ) -> list[dict]:
@@ -195,6 +217,7 @@ def build_history(
         }
         parsed = parse_iso(timestamp)
         if parsed is None:
+            _note_unparsed_time(event.get("time"))
             unparseable.append(entry)
         else:
             parseable.append((parsed, entry))
@@ -213,8 +236,13 @@ def _latest_event_iso(events: list | None) -> str | None:
     for event in events or []:
         if not isinstance(event, dict):
             continue
-        parsed = parse_iso(to_iso_timestamp(event.get("time")))
-        if parsed is not None and (latest is None or parsed > latest):
+        iso = to_iso_timestamp(event.get("time"))
+        parsed = parse_iso(iso)
+        if parsed is None:
+            if iso:
+                _note_unparsed_time(event.get("time"))
+            continue
+        if latest is None or parsed > latest:
             latest = parsed
     return latest.isoformat() if latest is not None else None
 
