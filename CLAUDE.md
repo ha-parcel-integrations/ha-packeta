@@ -22,7 +22,7 @@ you act in one of these areas:
 | consider "fixing" a lint/pattern the skill flags (poll interval, inline client) | *Deliberate skill divergences* |
 | commit, bump, tag, release, or write release notes; add a feature without a test | *Workflow / Commits / Versioning / Testing* |
 
-**API mechanics live in `docs/api/` (local-only, gitignored)** — the keyless
+**API mechanics live in `carrier-research/api/packeta/` (private research repo)** — the keyless
 `getPacketById` POST endpoint, the 404 "not found" signalling, the
 `packetStatusId` vocabulary and the `trackingDetails` payload. Do not duplicate
 them here.
@@ -41,7 +41,7 @@ them here.
 
 Packeta is a **pickup-point / locker network — 100% parcels**, no mail surface.
 **Status: unverified against a real parcel** — the success payload and status map
-are reconstructed from a maintained third-party client (see `docs/api/`); the map
+are reconstructed from a maintained third-party client (see `carrier-research/api/packeta/`); the map
 is incomplete by design (unknown ids → `unknown` + one-shot warning).
 
 - **Do not touch the merchant API** (`docs.packeta.com`, password-protected) — a
@@ -99,5 +99,6 @@ python -m pytest tests/ --cov=custom_components.packeta
 ```
 
 Coverage must stay **above 95%** (silver `test-coverage` rule). Run before
-committing. A code change updates the README + this file + `docs/` in the same
-commit; `docs/api/` is gitignored (local reverse-engineering notes).
+committing. A code change updates the README + this file in the same commit;
+the API reference now lives in the private `carrier-research/api/packeta/`,
+not in this repo.
