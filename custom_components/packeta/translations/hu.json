@@ -1,0 +1,144 @@
+{
+  "title": "Packeta",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Packeta beállítása",
+        "description": "A Packeta követéshez nincs szükség fiókra vagy irányítószámra – a központ azonnal létrejön. A csomagokat később, az integráció beállításaiban vagy a `packeta.track_parcel` szolgáltatással adhatod hozzá."
+      }
+    },
+    "abort": {
+      "already_configured": "A Packeta már be van állítva."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Packeta beállítások",
+        "sections": {
+          "parcels": {
+            "name": "Csomagok",
+            "data": {
+              "add": "Csomag hozzáadása",
+              "remove": "Csomagok eltávolítása"
+            },
+            "data_description": {
+              "add": "Add meg a Packeta követési kódot a követés elindításához. Megtalálod a szállítási visszaigazoláson vagy a sikertelen kézbesítésről szóló értesítőn."
+            }
+          },
+          "delivered": {
+            "name": "Kézbesített csomagok",
+            "data": {
+              "delivered_filter_type": "Szűrés",
+              "delivered_filter_amount": "Mennyiség"
+            },
+            "data_description": {
+              "delivered_filter_type": "Az elmúlt X nap kézbesített csomagjainak megjelenítése, vagy korlátozás a legutóbbi X darabra.",
+              "delivered_filter_amount": "A megjelenítendő napok vagy csomagok száma."
+            }
+          },
+          "history": {
+            "name": "Csomagelőzmények",
+            "data": {
+              "include_history": "Állapotelőzmények megjelenítése"
+            },
+            "data_description": {
+              "include_history": "Hozzáad egy csomagonkénti előzményattribútumot, amely felsorolja az egyes állapotfrissítéseket (időbélyeg, állapot, eredeti szöveg). Alapértelmezés szerint kikapcsolva."
+            }
+          },
+          "polling": {
+            "name": "Lekérdezés",
+            "data": {
+              "refresh_interval": "Frissítés gyakorisága"
+            },
+            "data_description": {
+              "refresh_interval": "Milyen gyakran ellenőrzi az integráció a Packetánál a csomagfrissítéseket. A hosszabb időköz kíméletesebb a Packeta API-jához; az alapértelmezett 30 perc a legtöbb csomaghoz elegendő."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "Ez nem hasonlít Packeta követési kódra.",
+      "already_tracked": "Ez a csomag már követve van."
+    }
+  },
+  "selector": {
+    "refresh_interval": {
+      "options": {
+        "15": "15 perc",
+        "30": "30 perc",
+        "60": "60 perc",
+        "120": "120 perc",
+        "240": "240 perc"
+      }
+    },
+    "delivered_filter_type": {
+      "options": {
+        "days": "Napok",
+        "parcels": "Csomagok száma"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Csomag követése",
+      "description": "Csomag követésének elindítása a Packeta követési kódja alapján.",
+      "fields": {
+        "tracking_code": {
+          "name": "Követési kód",
+          "description": "A Packeta követési kódja."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Csomag követésének leállítása",
+      "description": "Csomag követésének leállítása a Packeta követési kódja alapján.",
+      "fields": {
+        "tracking_code": {
+          "name": "Követési kód",
+          "description": "A Packeta követési kódja, amelynek a követését le kell állítani."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Egy csomag regisztrálva lett",
+      "parcel_status_changed": "Egy csomag állapota megváltozott",
+      "parcel_delivered": "Egy csomag kézbesítve lett",
+      "parcel_delivery_time_changed": "Egy csomag várható kézbesítési ideje megváltozott"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Frissítés"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Kézbesítések"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Érkező csomagok",
+        "unit_of_measurement": "csomag"
+      },
+      "next_delivery": {
+        "name": "Következő kézbesítés"
+      },
+      "delivered_parcels": {
+        "name": "Kézbesített csomagok",
+        "unit_of_measurement": "csomag"
+      },
+      "last_update": {
+        "name": "Utolsó sikeres frissítés"
+      },
+      "parcel": {
+        "name": "{barcode} csomag"
+      }
+    }
+  }
+}

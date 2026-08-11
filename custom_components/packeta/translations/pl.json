@@ -1,0 +1,144 @@
+{
+  "title": "Packeta",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Skonfiguruj Packetę",
+        "description": "Śledzenie Packety nie wymaga konta ani kodu pocztowego – centrum zostaje utworzone od razu. Paczki możesz dodać później w opcjach integracji lub za pomocą usługi `packeta.track_parcel`."
+      }
+    },
+    "abort": {
+      "already_configured": "Packeta jest już skonfigurowana."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcje Packety",
+        "sections": {
+          "parcels": {
+            "name": "Paczki",
+            "data": {
+              "add": "Dodaj paczkę",
+              "remove": "Usuń paczki"
+            },
+            "data_description": {
+              "add": "Wpisz kod śledzenia Packety, aby rozpocząć śledzenie. Znajdziesz go na potwierdzeniu wysyłki lub na awizo o nieudanej dostawie."
+            }
+          },
+          "delivered": {
+            "name": "Dostarczone paczki",
+            "data": {
+              "delivered_filter_type": "Filtruj według",
+              "delivered_filter_amount": "Liczba"
+            },
+            "data_description": {
+              "delivered_filter_type": "Pokaż dostarczone paczki z ostatnich X dni lub ogranicz do X najnowszych.",
+              "delivered_filter_amount": "Liczba dni lub paczek do wyświetlenia."
+            }
+          },
+          "history": {
+            "name": "Historia paczki",
+            "data": {
+              "include_history": "Uwzględnij historię statusów"
+            },
+            "data_description": {
+              "include_history": "Dodaje do paczki atrybut historii z każdą zmianą statusu (znacznik czasu, status, oryginalny tekst). Domyślnie wyłączone."
+            }
+          },
+          "polling": {
+            "name": "Odpytywanie",
+            "data": {
+              "refresh_interval": "Odświeżaj co"
+            },
+            "data_description": {
+              "refresh_interval": "Jak często integracja sprawdza w Packecie aktualizacje paczek. Dłuższy interwał jest łagodniejszy dla API Packety; domyślne 30 minut wystarcza dla większości paczek."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "To nie wygląda na kod śledzenia Packety.",
+      "already_tracked": "Ta paczka jest już śledzona."
+    }
+  },
+  "selector": {
+    "refresh_interval": {
+      "options": {
+        "15": "15 minut",
+        "30": "30 minut",
+        "60": "60 minut",
+        "120": "120 minut",
+        "240": "240 minut"
+      }
+    },
+    "delivered_filter_type": {
+      "options": {
+        "days": "Dni",
+        "parcels": "Liczba paczek"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Śledź paczkę",
+      "description": "Rozpocznij śledzenie paczki na podstawie jej kodu śledzenia Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Kod śledzenia",
+          "description": "Kod śledzenia Packety."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Przestań śledzić paczkę",
+      "description": "Zatrzymaj śledzenie paczki na podstawie jej kodu śledzenia Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Kod śledzenia",
+          "description": "Kod śledzenia Packety, dla którego ma zostać zatrzymane śledzenie."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Paczka została zarejestrowana",
+      "parcel_status_changed": "Status paczki się zmienił",
+      "parcel_delivered": "Paczka została dostarczona",
+      "parcel_delivery_time_changed": "Przewidywany czas dostawy paczki się zmienił"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Odśwież"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Dostawy"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Nadchodzące paczki",
+        "unit_of_measurement": "paczki"
+      },
+      "next_delivery": {
+        "name": "Następna dostawa"
+      },
+      "delivered_parcels": {
+        "name": "Dostarczone paczki",
+        "unit_of_measurement": "paczki"
+      },
+      "last_update": {
+        "name": "Ostatnia udana aktualizacja"
+      },
+      "parcel": {
+        "name": "Paczka {barcode}"
+      }
+    }
+  }
+}

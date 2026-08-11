@@ -1,0 +1,144 @@
+{
+  "title": "Packeta",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastaviť Packetu",
+        "description": "Sledovanie Packety nevyžaduje účet ani PSČ – centrála sa vytvorí okamžite. Zásielky môžete pridať neskôr v možnostiach integrácie alebo pomocou služby `packeta.track_parcel`."
+      }
+    },
+    "abort": {
+      "already_configured": "Packeta je už nastavená."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti Packety",
+        "sections": {
+          "parcels": {
+            "name": "Zásielky",
+            "data": {
+              "add": "Pridať zásielku",
+              "remove": "Odstrániť zásielky"
+            },
+            "data_description": {
+              "add": "Zadajte sledovací kód Packety a začnite ju sledovať. Nájdete ho na potvrdení o odoslaní alebo na karte o zmeškanom doručení."
+            }
+          },
+          "delivered": {
+            "name": "Doručené zásielky",
+            "data": {
+              "delivered_filter_type": "Filtrovať podľa",
+              "delivered_filter_amount": "Počet"
+            },
+            "data_description": {
+              "delivered_filter_type": "Zobraziť doručené zásielky za posledných X dní, alebo obmedziť na X najnovších.",
+              "delivered_filter_amount": "Počet dní alebo zásielok na zobrazenie."
+            }
+          },
+          "history": {
+            "name": "História zásielky",
+            "data": {
+              "include_history": "Zahrnúť históriu stavov"
+            },
+            "data_description": {
+              "include_history": "Pridá k zásielke atribút histórie s každou zmenou stavu (čas, stav, pôvodný text). V predvolenom nastavení vypnuté."
+            }
+          },
+          "polling": {
+            "name": "Aktualizácia",
+            "data": {
+              "refresh_interval": "Aktualizovať každých"
+            },
+            "data_description": {
+              "refresh_interval": "Ako často integrácia kontroluje Packetu ohľadom aktualizácií zásielok. Dlhší interval je šetrnejší k API Packety; predvolená hodnota 30 minút stačí pre väčšinu zásielok."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "Toto nevyzerá ako sledovací kód Packety.",
+      "already_tracked": "Táto zásielka sa už sleduje."
+    }
+  },
+  "selector": {
+    "refresh_interval": {
+      "options": {
+        "15": "15 minút",
+        "30": "30 minút",
+        "60": "60 minút",
+        "120": "120 minút",
+        "240": "240 minút"
+      }
+    },
+    "delivered_filter_type": {
+      "options": {
+        "days": "Dni",
+        "parcels": "Počet zásielok"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Sledovať zásielku",
+      "description": "Začať sledovať zásielku podľa jej sledovacieho kódu Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledovací kód",
+          "description": "Sledovací kód Packety."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Prestať sledovať zásielku",
+      "description": "Prestať sledovať zásielku podľa jej sledovacieho kódu Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledovací kód",
+          "description": "Sledovací kód Packety, pri ktorom sa má sledovanie ukončiť."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Zásielka bola zaregistrovaná",
+      "parcel_status_changed": "Stav zásielky sa zmenil",
+      "parcel_delivered": "Zásielka bola doručená",
+      "parcel_delivery_time_changed": "Očakávaný čas doručenia zásielky sa zmenil"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Aktualizovať"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Doručenia"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Prichádzajúce zásielky",
+        "unit_of_measurement": "zásielky"
+      },
+      "next_delivery": {
+        "name": "Ďalšie doručenie"
+      },
+      "delivered_parcels": {
+        "name": "Doručené zásielky",
+        "unit_of_measurement": "zásielky"
+      },
+      "last_update": {
+        "name": "Posledná úspešná aktualizácia"
+      },
+      "parcel": {
+        "name": "Zásielka {barcode}"
+      }
+    }
+  }
+}

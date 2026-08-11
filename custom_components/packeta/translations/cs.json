@@ -1,0 +1,144 @@
+{
+  "title": "Packeta",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastavit Packetu",
+        "description": "Sledování Packety nevyžaduje účet ani PSČ – hub se vytvoří okamžitě. Zásilky můžete přidat později v možnostech integrace nebo pomocí služby `packeta.track_parcel`."
+      }
+    },
+    "abort": {
+      "already_configured": "Packeta je již nastavena."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti Packety",
+        "sections": {
+          "parcels": {
+            "name": "Zásilky",
+            "data": {
+              "add": "Přidat zásilku",
+              "remove": "Odebrat zásilky"
+            },
+            "data_description": {
+              "add": "Zadejte sledovací kód Packety a začněte ji sledovat. Najdete ho na potvrzení o odeslání nebo na kartě o zmeškaném doručení."
+            }
+          },
+          "delivered": {
+            "name": "Doručené zásilky",
+            "data": {
+              "delivered_filter_type": "Filtrovat podle",
+              "delivered_filter_amount": "Počet"
+            },
+            "data_description": {
+              "delivered_filter_type": "Zobrazit doručené zásilky za posledních X dní, nebo omezit na X nejnovějších.",
+              "delivered_filter_amount": "Počet dní nebo zásilek k zobrazení."
+            }
+          },
+          "history": {
+            "name": "Historie zásilky",
+            "data": {
+              "include_history": "Zahrnout historii stavů"
+            },
+            "data_description": {
+              "include_history": "Přidá k zásilce atribut historie s každou změnou stavu (čas, stav, původní text). Ve výchozím nastavení vypnuto."
+            }
+          },
+          "polling": {
+            "name": "Aktualizace",
+            "data": {
+              "refresh_interval": "Aktualizovat každých"
+            },
+            "data_description": {
+              "refresh_interval": "Jak často integrace kontroluje Packetu ohledně aktualizací zásilek. Delší interval je šetrnější k API Packety; výchozí hodnota 30 minut stačí pro většinu zásilek."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "To nevypadá jako sledovací kód Packety.",
+      "already_tracked": "Tato zásilka už je sledována."
+    }
+  },
+  "selector": {
+    "refresh_interval": {
+      "options": {
+        "15": "15 minut",
+        "30": "30 minut",
+        "60": "60 minut",
+        "120": "120 minut",
+        "240": "240 minut"
+      }
+    },
+    "delivered_filter_type": {
+      "options": {
+        "days": "Dny",
+        "parcels": "Počet zásilek"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Sledovat zásilku",
+      "description": "Začít sledovat zásilku podle jejího sledovacího kódu Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledovací kód",
+          "description": "Sledovací kód Packety."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Přestat sledovat zásilku",
+      "description": "Přestat sledovat zásilku podle jejího sledovacího kódu Packety.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledovací kód",
+          "description": "Sledovací kód Packety, u kterého se má sledování ukončit."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Zásilka byla zaregistrována",
+      "parcel_status_changed": "Stav zásilky se změnil",
+      "parcel_delivered": "Zásilka byla doručena",
+      "parcel_delivery_time_changed": "Očekávaný čas doručení zásilky se změnil"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Aktualizovat"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Doručení"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Přijíždějící zásilky",
+        "unit_of_measurement": "zásilky"
+      },
+      "next_delivery": {
+        "name": "Další doručení"
+      },
+      "delivered_parcels": {
+        "name": "Doručené zásilky",
+        "unit_of_measurement": "zásilky"
+      },
+      "last_update": {
+        "name": "Poslední úspěšná aktualizace"
+      },
+      "parcel": {
+        "name": "Zásilka {barcode}"
+      }
+    }
+  }
+}
