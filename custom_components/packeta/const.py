@@ -28,6 +28,21 @@ class ParcelStatus(StrEnum):
 
 PLATFORMS = [Platform.BUTTON, Platform.CALENDAR, Platform.SENSOR]
 
+# Every optional key the parcel contract defines. CAPABILITIES below must be a
+# subset of this — it exists so a typo in CAPABILITIES fails a test instead of
+# silently dropping this carrier off a table on the docs site.
+KNOWN_CAPABILITIES = frozenset(
+    {"weight", "dimensions", "delivery_window", "pickup_point", "url", "history"}
+)
+
+# Which optional contract fields this carrier's API actually populates — feeds
+# the comparison table on the docs site. Keep in lockstep with
+# normalize_parcel() in parcels.py: everything not listed here comes back as a
+# literal None there. Packeta's minimal consumer payload carries no weight,
+# dimensions, ETA window, or pickup-branch name — only the tracking URL and
+# the event timeline survive.
+CAPABILITIES = frozenset({"url", "history"})
+
 # Packeta exposes a keyless consumer tracking endpoint — the one the
 # tracking.packeta.com widget calls. No API key, no header, no postcode.
 #

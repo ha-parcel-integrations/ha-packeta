@@ -51,7 +51,9 @@ is incomplete by design (unknown ids → `unknown` + one-shot warning).
   fires (machinery kept for parity, exercised white-box). There is no per-event
   status code, so every history entry keeps `status = None`. **`None` on purpose:**
   `sender`, `receiver`, `weight`, `dimensions`, and `pickup_point` (a fuller
-  response likely names the branch — `TODO(carrier)`).
+  response likely names the branch — `TODO(carrier)`). Reflected in
+  `const.py`'s `CAPABILITIES` (feeds the docs site's comparison table) — keep
+  the two in agreement if that ever changes.
 
 ## Options and reloads — account-less model
 
