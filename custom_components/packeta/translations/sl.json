@@ -1,0 +1,144 @@
+{
+  "title": "Packeta",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastavitev Packete",
+        "description": "Sledenje Packeti ne potrebuje računa ali poštne številke – vozlišče je ustvarjeno takoj. Pakete nato dodaš prek možnosti integracije ali storitve `packeta.track_parcel`."
+      }
+    },
+    "abort": {
+      "already_configured": "Packeta je že nastavljena."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti Packete",
+        "sections": {
+          "parcels": {
+            "name": "Paketi",
+            "data": {
+              "add": "Dodaj paket",
+              "remove": "Odstrani pakete"
+            },
+            "data_description": {
+              "add": "Vnesite sledilno kodo Packete, da začnete slediti paketu. Najdete jo na potrdilu o pošiljanju ali kartici o zgrešeni dostavi."
+            }
+          },
+          "delivered": {
+            "name": "Dostavljeni paketi",
+            "data": {
+              "delivered_filter_type": "Filtriraj po",
+              "delivered_filter_amount": "Količina"
+            },
+            "data_description": {
+              "delivered_filter_type": "Prikaži dostavljene pakete iz zadnjih X dni ali omeji na X najnovejših.",
+              "delivered_filter_amount": "Število dni ali paketov za prikaz."
+            }
+          },
+          "history": {
+            "name": "Zgodovina paketov",
+            "data": {
+              "include_history": "Vključi zgodovino stanj"
+            },
+            "data_description": {
+              "include_history": "Vsakemu paketu doda atribut zgodovine s seznamom vsake posodobitve stanja (časovni žig, stanje, izvirno besedilo). Privzeto izklopljeno."
+            }
+          },
+          "polling": {
+            "name": "Osveževanje",
+            "data": {
+              "refresh_interval": "Osveži vsakih"
+            },
+            "data_description": {
+              "refresh_interval": "Kako pogosto integracija preverja Packeto za posodobitve paketov. Počasnejši interval je prijaznejši do API-ja Packete; privzetih 30 minut zadostuje za večino paketov."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "invalid_tracking_code": "To ni videti kot sledilna koda Packete.",
+      "already_tracked": "Temu paketu že sledimo."
+    }
+  },
+  "selector": {
+    "refresh_interval": {
+      "options": {
+        "15": "15 minut",
+        "30": "30 minut",
+        "60": "60 minut",
+        "120": "120 minut",
+        "240": "240 minut"
+      }
+    },
+    "delivered_filter_type": {
+      "options": {
+        "days": "Dnevi",
+        "parcels": "Število paketov"
+      }
+    }
+  },
+  "services": {
+    "track_parcel": {
+      "name": "Sledi paketu",
+      "description": "Začne slediti paketu po njegovi sledilni kodi Packete.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledilna koda",
+          "description": "Sledilna koda Packete."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Prenehaj slediti paketu",
+      "description": "Preneha slediti paketu po njegovi sledilni kodi Packete.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledilna koda",
+          "description": "Sledilna koda Packete, ki ji želite prenehati slediti."
+        }
+      }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "Paket je bil registriran",
+      "parcel_status_changed": "Stanje paketa se je spremenilo",
+      "parcel_delivered": "Paket je bil dostavljen",
+      "parcel_delivery_time_changed": "Pričakovani čas dostave paketa se je spremenil"
+    }
+  },
+  "entity": {
+    "button": {
+      "refresh": {
+        "name": "Osveži"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Dostave"
+      }
+    },
+    "sensor": {
+      "incoming_parcels": {
+        "name": "Prihajajoči paketi",
+        "unit_of_measurement": "paketov"
+      },
+      "next_delivery": {
+        "name": "Naslednja dostava"
+      },
+      "delivered_parcels": {
+        "name": "Dostavljeni paketi",
+        "unit_of_measurement": "paketov"
+      },
+      "last_update": {
+        "name": "Zadnja uspešna posodobitev"
+      },
+      "parcel": {
+        "name": "Paket {barcode}"
+      }
+    }
+  }
+}
