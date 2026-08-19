@@ -40,9 +40,12 @@ them here.
 ## Carrier-specific decisions (integration only)
 
 Packeta is a **pickup-point / locker network — 100% parcels**, no mail surface.
-**Status: unverified against a real parcel** — the success payload and status map
-are reconstructed from a maintained third-party client (see `carrier-research/api/packeta/`); the map
-is incomplete by design (unknown ids → `unknown` + one-shot warning).
+**Status: confirmed against real delivered parcels (2026-08-19).** The success
+payload shape, the `packetStatusId: "3"` (delivered) mapping, the naive
+space-separated `trackingDetails[].time` shape, `sender` and `branchAddress`
+are all now seen live — see `carrier-research/api/packeta/`. The other five
+`packetStatusId` values are still reconstructed from a third-party client; the
+map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
 
 - **Do not touch the merchant API** (`docs.packeta.com`, password-protected) — a
   different surface.
@@ -50,9 +53,12 @@ is incomplete by design (unknown ids → `unknown` + one-shot warning).
   sensor and calendar stay inert and `packeta_parcel_delivery_time_changed` never
   fires (machinery kept for parity, exercised white-box). There is no per-event
   status code, so every history entry keeps `status = None`. **`None` on purpose:**
-  `sender`, `receiver`, `weight`, `dimensions`, and `pickup_point` (a fuller
-  response likely names the branch — `TODO(carrier)`). Reflected in
-  `const.py`'s `CAPABILITIES` (feeds the docs site's comparison table) — keep
+  `receiver`, `weight`, `dimensions` — not in the payload. `sender` and
+  `pickup_point` are now populated (`item.sender` / `item.branchAddress`).
+  `trackingDetails[].time` is naive and anchored to `Europe/Prague` (Packeta is
+  domestic to Czechia) rather than UTC — see `_PRAGUE` in `parcels.py`.
+  Reflected in `const.py`'s `CAPABILITIES` (feeds the docs site's comparison
+  table) — keep
   the two in agreement if that ever changes.
 
 ## Options and reloads — account-less model

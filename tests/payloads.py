@@ -1,16 +1,14 @@
 """Sample Packeta API payloads shared by the test modules.
 
 These reproduce the ``item`` object the keyless ``getPacketById`` endpoint
-returns on success: ``{barcode, packetStatusId, trackingDetails:[{text, time}]}``.
-``trackingDetails`` events carry only human ``text`` and a ``time`` string, and
-there is no per-event status code.
-
-NOTE: the endpoint and its 404 "not found" shape were verified live, but this
-*success* shape and the ``packetStatusId`` values are **reconstructed** from the
-maintained client ``itsvic-dev/deliveries`` and are unverified against a real
-parcel. When a real ``Z``-number arrives, this is the one module to correct —
-see TODO.md. (Event ``time`` here is ISO so the tests can order it; the real
-format is unconfirmed.)
+returns on success. Confirmed live against real delivered parcels 2026-08-19
+(values below are fictional placeholders, not the real payload — see
+carrier-research/packeta/ for that): ``barcode``, ``packetStatusId``,
+``sender``, ``branchAddress`` and ``trackingDetails: [{text, time}]``.
+``trackingDetails`` events carry only human ``text`` and a naive,
+space-separated ``time`` string (``"YYYY-MM-DD HH:MM:SS"``, no offset) — and
+there is no per-event status code. The other five ``packetStatusId`` values
+remain reconstructed from the maintained client ``itsvic-dev/deliveries``.
 """
 from __future__ import annotations
 
@@ -29,11 +27,13 @@ def delivered_sample(code: str = DELIVERED_CODE) -> dict:
     return {
         "barcode": code,
         "packetStatusId": "3",
+        "sender": "Example Sender s.r.o.",
+        "branchAddress": "Example Pickup Point, Example Street 1",
         "trackingDetails": [
-            event("Parcel data received", "2026-04-27T23:03:58Z"),
-            event("On the way", "2026-04-28T15:52:17Z"),
-            event("Ready for pickup", "2026-04-29T08:46:00Z"),
-            event("Delivered to the recipient", "2026-04-29T13:12:42Z"),
+            event("Parcel data received", "2026-04-27 23:03:58"),
+            event("On the way", "2026-04-28 15:52:17"),
+            event("Ready for pickup", "2026-04-29 08:46:00"),
+            event("Delivered to the recipient", "2026-04-29 13:12:42"),
         ],
     }
 

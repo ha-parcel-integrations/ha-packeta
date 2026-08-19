@@ -9,15 +9,14 @@ trivially unit-testable without spinning up HA.
 The carrier-specific parts are :data:`_STATUS_MAP`, :func:`build_history` and
 :func:`normalize_parcel` (the Packeta ``item`` field lookups). Everything else
 — the sort contract, the delivered filter, the one-shot warning for unmapped
-statuses — is suite-wide machinery and should be left alone. The remaining
-``TODO(carrier)`` marker flags the one bit still unverified against a real
-parcel (whether a fuller response names the pickup branch).
+statuses — is suite-wide machinery and should be left alone.
 """
 from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from homeassistant.config_entries import ConfigEntry
 
@@ -50,9 +49,11 @@ NEW_ISSUE_URL = (
 # semantic meaning is in the trailing comment. Two deliberately use our more
 # granular enum: ``997`` (to-be-processed) → REGISTERED rather than in-transit,
 # and ``21`` (lost/unknown) → PROBLEM rather than unknown, since a lost parcel
-# is an exception worth surfacing. The client already logs unmapped ids, so
-# this map is incomplete by design: a real parcel will surface more, which land
-# as ``unknown`` plus a one-shot warning that asks the user to report them.
+# is an exception worth surfacing. ``3`` is confirmed live: a real delivered
+# parcel carried ``packetStatus: "The package has been delivered"`` alongside
+# ``packetStatusId: "3"``. The other five remain reconstructed only. The map
+# stays incomplete by design: unmapped ids land as ``unknown`` plus a one-shot
+# warning that asks the user to report them.
 _STATUS_MAP: dict[str, ParcelStatus] = {
     "997": ParcelStatus.REGISTERED,        # TO_BE_PROCESSED
     "1": ParcelStatus.IN_TRANSIT,          # WAITING_FOR_DELIVERY (in warehouse)
@@ -128,13 +129,25 @@ def parse_iso(value: str | None) -> datetime | None:
     return parsed
 
 
+# Packeta's ``trackingDetails[].time`` was format-unconfirmed until a real
+# parcel confirmed it: a naive, space-separated string with no offset, e.g.
+# ``"2026-08-13 14:02:30"``. Packeta is domestic to Czechia — the depots in
+# that same real payload were all Czech (Rudná, Nučice, Praha, Ostrava) — so a
+# naive value is anchored to Europe/Prague rather than UTC, the same choice
+# ha-planzer/ha-quickpac make for their own domestic carriers: reading it as
+# UTC would shift every event by one or two hours depending on DST.
+_PRAGUE = ZoneInfo("Europe/Prague")
+
+
 def to_iso_timestamp(value: Any) -> str | None:
     """Return an ISO 8601 string for an API timestamp field.
 
     Numbers are treated as **epoch milliseconds** — the common case for the
-    consumer APIs in this suite. Strings pass through untouched; their
-    consumers are guarded by :func:`parse_iso`. Adjust the numeric branch if
-    your carrier stamps in seconds.
+    consumer APIs in this suite. A string that parses but carries no offset
+    (Packeta's confirmed ``trackingDetails[].time`` shape) is anchored to
+    :data:`_PRAGUE`; a string that already carries an offset, or does not
+    parse at all, passes through untouched — their consumers are guarded by
+    :func:`parse_iso`.
     """
     if value is None:
         return None
@@ -143,7 +156,14 @@ def to_iso_timestamp(value: Any) -> str | None:
             return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
         except (OverflowError, OSError, ValueError):
             return None
-    return str(value)
+    text = str(value)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return text
+    if parsed.tzinfo is not None:
+        return text
+    return parsed.replace(tzinfo=_PRAGUE).isoformat()
 
 
 def format_dimensions(
@@ -166,23 +186,24 @@ def format_dimensions(
     }
 
 
-# Packeta's event ``time`` is a string whose exact format is unconfirmed (see
-# TODO.md). When a real event carries a ``time`` we cannot parse, ``delivered_at``
-# and event ordering silently fall back — so we log it once so a tester can
-# report the real format and we can adjust the parsing. See NEW_ISSUE_URL.
+# Packeta's event ``time`` format is confirmed (see ``_PRAGUE`` above), so a
+# value that still doesn't parse is a genuine anomaly rather than an expected
+# gap — it means ``delivered_at`` and event ordering silently fall back for
+# that entry. Logged once so a tester can report the real shape. See
+# NEW_ISSUE_URL.
 _unparsed_time_logged = False
 
 
 def _note_unparsed_time(value: Any) -> None:
-    """One-shot: flag an event time we could not parse (format is unconfirmed)."""
+    """One-shot: flag an event time that didn't match the confirmed shape."""
     global _unparsed_time_logged
     if _unparsed_time_logged:
         return
     _unparsed_time_logged = True
     _LOGGER.warning(
-        "Packeta event time %r did not parse — the format is unconfirmed, so "
-        "delivered-at and event ordering may be off. Please report it so we can "
-        "fix the parsing (a diagnostics file is ideal): %s",
+        "Packeta event time %r did not parse — it doesn't match the confirmed "
+        "'YYYY-MM-DD HH:MM:SS' shape, so delivered-at and event ordering may "
+        "be off. Please report it (a diagnostics file is ideal): %s",
         value,
         NEW_ISSUE_URL,
     )
@@ -196,11 +217,11 @@ def build_history(
     Each entry is ``{timestamp, status, raw_status}`` — identical across all
     suite carriers, and top-level (not under ``raw``) so it survives the
     aggregator's ``strip_raw()``. Packeta's ``trackingDetails`` events carry
-    only ``text`` (human, localised) and ``time`` (a string, format
-    unconfirmed) — there is no per-event status code, so every entry keeps
-    ``status = None`` and ``raw_status = text``. Sorted oldest → newest;
-    events whose ``time`` does not parse are kept last rather than dropped
-    (until the format is confirmed against a real parcel).
+    only ``text`` (human, localised) and ``time`` (a naive, space-separated
+    string — confirmed against a real parcel, see ``_PRAGUE``) — there is no
+    per-event status code, so every entry keeps ``status = None`` and
+    ``raw_status = text``. Sorted oldest → newest; events whose ``time`` does
+    not match the confirmed shape are kept last rather than dropped.
     """
     parseable: list[tuple[datetime, dict]] = []
     unparseable: list[dict] = []
@@ -262,10 +283,11 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     cross-carrier dashboards depend on it. A key the carrier does not expose is
     ``None`` — never omitted.
 
-    Packeta's minimal consumer payload exposes only the barcode, a numeric
-    status and an event timeline, so most fields are ``None``: no sender /
-    receiver, no weight / dimensions, and no ETA window (``planned_from`` /
-    ``planned_to`` stay ``None``).
+    A real parcel confirmed the full ``item`` shape carries ``sender`` (the
+    merchant name) and ``branchAddress`` (the pickup-point name) alongside the
+    minimal fields the reconstructed model assumed. ``receiver`` is still not
+    in the payload, and there's still no weight / dimensions / ETA window
+    (``planned_from`` / ``planned_to`` stay ``None``).
     """
     # ``barcode`` is the item's own number; fall back to the code the
     # coordinator asked for (it injects ``trackingNumber`` on the pending
@@ -285,8 +307,9 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     return {
         "carrier": "Packeta",
         "barcode": barcode,
-        # Packeta's minimal consumer payload names neither party.
-        "sender": None,
+        # Confirmed against a real parcel: ``item.sender`` is the merchant
+        # name. Packeta never names the recipient.
+        "sender": raw.get("sender") or None,
         "receiver": None,
         "status": status,
         # No top-level status text; the carrier's own status token is the
@@ -299,10 +322,10 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "planned_from": None,
         "planned_to": None,
         "pickup": at_pickup,
-        # TODO(carrier): a fuller response likely names the pickup branch for an
-        # AT_PICKUP_POINT parcel; the minimal model does not carry it, so None
-        # until a real payload shows the field.
-        "pickup_point": None,
+        # Confirmed against a real parcel: ``item.branchAddress`` names the
+        # assigned pickup point (e.g. a Z-BOX or partner shop) and is present
+        # regardless of status, not just while AT_PICKUP_POINT.
+        "pickup_point": raw.get("branchAddress") or None,
         "url": tracking_url(barcode),
         # Not exposed by the consumer endpoint.
         "weight": None,

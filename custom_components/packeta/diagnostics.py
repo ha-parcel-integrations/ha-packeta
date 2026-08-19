@@ -21,6 +21,14 @@ TO_REDACT = {
     # Packeta payload fields (``item``)
     "barcode",           # the tracking number
     "trackingNumber",    # coordinator's injected fallback key
+    "orderNumber",       # ties to a specific merchant order
+    "senderUrl",         # the merchant's own site
+    # branch/pickup-point fields, confirmed against a real parcel
+    "branchAddress",
+    "branchAddressFull",
+    "branchUrl",
+    "branchId",
+    "openingHours",
     # generic fields that may appear in a fuller response
     "recipient",
     "address",

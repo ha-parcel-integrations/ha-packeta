@@ -13,12 +13,15 @@ async def test_diagnostics_redacts_and_counts(hass):
     entry.runtime_data.coordinator.data = [
         {
             "barcode": "Z1112223334",
-            "sender": None,
+            "sender": "Example Sender s.r.o.",
             "receiver": None,
             "status": "in_transit",
             "raw": {
                 "barcode": "Z1112223334",
                 "packetStatusId": "31",
+                "sender": "Example Sender s.r.o.",
+                "orderNumber": "123456789",
+                "branchAddress": "Example Pickup Point, Example Street 1",
             },
         }
     ]
@@ -31,6 +34,10 @@ async def test_diagnostics_redacts_and_counts(hass):
     assert result["entry_options"]["parcels"][0]["tracking_code"] == "**REDACTED**"
     assert result["incoming"][0]["barcode"] == "**REDACTED**"
     assert result["incoming"][0]["raw"]["barcode"] == "**REDACTED**"
+    # confirmed against a real parcel: merchant name, order and branch address
+    assert result["incoming"][0]["sender"] == "**REDACTED**"
+    assert result["incoming"][0]["raw"]["orderNumber"] == "**REDACTED**"
+    assert result["incoming"][0]["raw"]["branchAddress"] == "**REDACTED**"
     # non-identifying fields survive, or the diagnostics would be useless
     assert result["incoming"][0]["status"] == "in_transit"
     assert result["incoming"][0]["raw"]["packetStatusId"] == "31"

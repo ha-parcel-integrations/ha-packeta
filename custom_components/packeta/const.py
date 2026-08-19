@@ -38,10 +38,9 @@ KNOWN_CAPABILITIES = frozenset(
 # Which optional contract fields this carrier's API actually populates — feeds
 # the comparison table on the docs site. Keep in lockstep with
 # normalize_parcel() in parcels.py: everything not listed here comes back as a
-# literal None there. Packeta's minimal consumer payload carries no weight,
-# dimensions, ETA window, or pickup-branch name — only the tracking URL and
-# the event timeline survive.
-CAPABILITIES = frozenset({"url", "history"})
+# literal None there. A real parcel confirmed ``branchAddress`` (pickup-point
+# name); Packeta still carries no weight, dimensions or ETA window.
+CAPABILITIES = frozenset({"url", "history", "pickup_point"})
 
 # Packeta exposes a keyless consumer tracking endpoint — the one the
 # tracking.packeta.com widget calls. No API key, no header, no postcode.
@@ -56,11 +55,12 @@ CAPABILITIES = frozenset({"url", "history"})
 # * Unknown / not-yet-scanned number → HTTP 404
 #   ``{"error": "notFound", ...}`` — a normal, expected state, not an error.
 #
-# Verified live 2026-07-26 (404 on a fake number). The *success* payload shape
-# and the ``packetStatusId`` map are reconstructed from the maintained client
-# ``itsvic-dev/deliveries`` and are unverified against a real parcel — see
-# TODO.md. Rate limiting is unmeasured; revisit ``--interval fixed`` if it
-# throttles.
+# Verified live 2026-07-26 (404 on a fake number). The success payload shape
+# and the ``packetStatusId`` map were reconstructed from the maintained client
+# ``itsvic-dev/deliveries`` and confirmed live against real delivered parcels
+# 2026-08-19 — see carrier-research/packeta/. The other five status ids remain
+# reconstructed only. Rate limiting is still unmeasured; revisit
+# ``--interval fixed`` if it throttles.
 TRACKING_API_URL = (
     "https://tracking.packeta.com/api/getPacketById/{tracking_code}/{locale}"
 )

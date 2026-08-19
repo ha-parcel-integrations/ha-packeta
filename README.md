@@ -10,14 +10,14 @@ A custom Home Assistant integration that tracks your [Packeta](https://www.packe
 
 Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) family: it publishes the same canonical parcel format, statuses and events as the other carrier integrations, so it plugs straight into the [Parcel Aggregator](https://github.com/ha-parcel-integrations/ha-parcel-aggregator) and cross-carrier automations.
 
-> ### ⚠️ Early release — the success payload is not yet confirmed
+> ### ⚠️ The status map is still growing
 >
-> The endpoint is live and keyless, and unknown or not-yet-scanned numbers are
-> handled correctly. What has **not yet been seen from a real parcel** is a
-> success response: its shape and the `packetStatusId` status map are
-> reconstructed from a maintained open-source client, with six status ids mapped
-> so far. Anything unmapped reports **`unknown`** (never a wrong status) and logs
-> a one-shot warning with a ready-made issue link — please
+> The endpoint is live and keyless, and the success payload shape has been
+> confirmed against real delivered parcels. Six `packetStatusId` values are
+> mapped so far (one of them, `3`/delivered, seen live; the rest reconstructed
+> from a maintained open-source client). Anything unmapped reports
+> **`unknown`** (never a wrong status) and logs a one-shot warning with a
+> ready-made issue link — please
 > [report it](https://github.com/ha-parcel-integrations/ha-packeta/issues/new?template=unrecognised_status.yml)
 > so the mapping can be completed.
 

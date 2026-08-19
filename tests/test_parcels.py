@@ -114,6 +114,15 @@ def test_to_iso_timestamp_converts_epoch_milliseconds():
     assert to_iso_timestamp(10**20) is None  # out of range -> None, never raises
 
 
+def test_to_iso_timestamp_anchors_naive_string_to_prague():
+    """Packeta's confirmed trackingDetails[].time shape: naive, space-separated."""
+    assert to_iso_timestamp("2026-04-29 13:12:42") == "2026-04-29T13:12:42+02:00"
+    # Winter (CET, no DST) still resolves correctly.
+    assert to_iso_timestamp("2026-01-15 08:00:00") == "2026-01-15T08:00:00+01:00"
+    # Garbage passes through untouched for parse_iso to reject downstream.
+    assert to_iso_timestamp("not-a-date") == "not-a-date"
+
+
 def test_format_dimensions_needs_all_three_axes():
     assert format_dimensions(30, 20, 10) == {
         "length": 30,
@@ -198,16 +207,16 @@ def test_normalize_delivered_parcel():
     parcel = normalize_parcel(delivered_sample())
     assert parcel["carrier"] == "Packeta"
     assert parcel["barcode"] == "Z9998887776"
-    # Packeta's minimal consumer payload names neither party.
-    assert parcel["sender"] is None
-    assert parcel["receiver"] is None
+    # Confirmed against a real parcel: item.sender names the merchant.
+    assert parcel["sender"] == "Example Sender s.r.o."
+    assert parcel["receiver"] is None  # Packeta never names the recipient
     assert parcel["status"] == ParcelStatus.DELIVERED
     # raw_status is the carrier's own status token (the numeric packetStatusId);
     # the human text lives in history.
     assert parcel["raw_status"] == "3"
     assert parcel["delivered"] is True
-    # delivered_at is the newest event's time.
-    assert parcel["delivered_at"] == "2026-04-29T13:12:42+00:00"
+    # delivered_at is the newest event's time, anchored to Europe/Prague.
+    assert parcel["delivered_at"] == "2026-04-29T13:12:42+02:00"
     # Packeta exposes no ETA window at all.
     assert parcel["planned_from"] is None
     assert parcel["planned_to"] is None
@@ -215,6 +224,8 @@ def test_normalize_delivered_parcel():
     assert parcel["weight"] is None
     assert parcel["dimensions"] is None
     assert parcel["history"] is None  # opt-in, default off
+    # Confirmed against a real parcel: item.branchAddress names the pickup point.
+    assert parcel["pickup_point"] == "Example Pickup Point, Example Street 1"
 
 
 def test_normalize_history_is_opt_in():
@@ -236,8 +247,15 @@ def test_normalize_pickup_parcel():
     parcel = normalize_parcel(pickup_sample())
     assert parcel["status"] == ParcelStatus.AT_PICKUP_POINT
     assert parcel["pickup"] is True
-    # The minimal payload does not name the pickup branch.
-    assert parcel["pickup_point"] is None
+    # Confirmed against a real parcel: item.branchAddress names the branch.
+    assert parcel["pickup_point"] == "Example Pickup Point, Example Street 1"
+
+
+def test_normalize_pickup_point_absent_is_none():
+    """A payload without branchAddress (e.g. a courier-delivered parcel) stays None."""
+    raw = pickup_sample()
+    del raw["branchAddress"]
+    assert normalize_parcel(raw)["pickup_point"] is None
 
 
 def test_normalize_pending_placeholder():
@@ -336,6 +354,6 @@ def test_capabilities_are_known_values():
     assert CAPABILITIES <= KNOWN_CAPABILITIES
 
 
-def test_capabilities_are_url_and_history_only():
-    """The minimal consumer payload has no weight, dimensions, ETA, or branch name."""
-    assert CAPABILITIES == {"url", "history"}
+def test_capabilities_are_url_history_and_pickup_point():
+    """Confirmed against a real parcel: still no weight, dimensions, or ETA."""
+    assert CAPABILITIES == {"url", "history", "pickup_point"}
