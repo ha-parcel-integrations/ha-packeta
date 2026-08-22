@@ -123,11 +123,11 @@
     },
     "sensor": {
       "incoming_parcels": {
-        "name": "Přijíždějící zásilky",
+        "name": "Příchozí zásilky",
         "unit_of_measurement": "zásilky"
       },
       "next_delivery": {
-        "name": "Další doručení"
+        "name": "Očekávané doručení"
       },
       "delivered_parcels": {
         "name": "Doručené zásilky",
