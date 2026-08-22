@@ -22,7 +22,7 @@ you act in one of these areas:
 | consider "fixing" a lint/pattern the skill flags (poll interval, inline client) | *Deliberate skill divergences* |
 | commit, bump, tag, release, or write release notes; add a feature without a test | *Workflow / Commits / Versioning / Testing* |
 
-**API mechanics live in `carrier-research/api/packeta/` (private research repo)** — the keyless
+**API mechanics live in `carrier-research/packeta/api/` (private research repo)** — the keyless
 `getPacketById` POST endpoint, the 404 "not found" signalling, the
 `packetStatusId` vocabulary and the `trackingDetails` payload. Do not duplicate
 them here.
@@ -43,7 +43,7 @@ Packeta is a **pickup-point / locker network — 100% parcels**, no mail surface
 **Status: confirmed against real delivered parcels (2026-08-19).** The success
 payload shape, the `packetStatusId: "3"` (delivered) mapping, the naive
 space-separated `trackingDetails[].time` shape, `sender` and `branchAddress`
-are all now seen live — see `carrier-research/api/packeta/`. The other five
+are all now seen live — see `carrier-research/packeta/api/`. The other five
 `packetStatusId` values are still reconstructed from a third-party client; the
 map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
 
@@ -100,5 +100,5 @@ python -m pytest tests/ --cov=custom_components.packeta
 
 Coverage must stay **above 95%** (silver `test-coverage` rule). Run before
 committing. A code change updates the README + this file in the same commit;
-the API reference now lives in the private `carrier-research/api/packeta/`,
+the API reference now lives in the private `carrier-research/packeta/api/`,
 not in this repo.
