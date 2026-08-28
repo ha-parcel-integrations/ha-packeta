@@ -55,6 +55,25 @@
               "refresh_interval": "Jak często integracja sprawdza w Packecie aktualizacje paczek. Dłuższy interwał jest łagodniejszy dla API Packety; domyślne 30 minut wystarcza dla większości paczek."
             }
           }
+        },
+        "menu_options": {
+          "parcels": "Przesyłki",
+          "settings": "Ustawienia"
+        }
+      },
+      "parcels": {
+        "title": "Przesyłki",
+        "data": {
+          "tracking_codes": "Numery przesyłek"
+        }
+      },
+      "settings": {
+        "title": "Ustawienia",
+        "data": {
+          "delivered_filter_type": "Dostarczone przesyłki: filtruj według",
+          "delivered_filter_amount": "Dostarczone przesyłki: liczba",
+          "include_history": "Uwzględnij historię statusu",
+          "refresh_interval": "Odświeżaj co"
         }
       }
     },

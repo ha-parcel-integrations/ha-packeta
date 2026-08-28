@@ -55,6 +55,25 @@
               "refresh_interval": "Kako pogosto integracija preverja Packeto za posodobitve paketov. Počasnejši interval je prijaznejši do API-ja Packete; privzetih 30 minut zadostuje za večino paketov."
             }
           }
+        },
+        "menu_options": {
+          "parcels": "Parcels",
+          "settings": "Settings"
+        }
+      },
+      "parcels": {
+        "title": "Parcels",
+        "data": {
+          "tracking_codes": "Tracking codes"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "delivered_filter_type": "Delivered parcels: filter by",
+          "delivered_filter_amount": "Delivered parcels: amount",
+          "include_history": "Include status history",
+          "refresh_interval": "Refresh every"
         }
       }
     },
