@@ -45,15 +45,6 @@
             "data_description": {
               "include_history": "Adaugă un atribut de istoric pentru fiecare colet, listând fiecare actualizare de stare (marcaj de timp, stare, text original). Dezactivat implicit."
             }
-          },
-          "polling": {
-            "name": "Interogare",
-            "data": {
-              "refresh_interval": "Actualizează la fiecare"
-            },
-            "data_description": {
-              "refresh_interval": "Cât de des verifică integrarea la Packeta actualizările coletelor. Un interval mai lung este mai blând cu API-ul Packeta; valoarea implicită de 30 de minute este suficientă pentru majoritatea coletelor."
-            }
           }
         },
         "menu_options": {
@@ -72,8 +63,7 @@
         "data": {
           "delivered_filter_type": "Colete livrate: filtrează după",
           "delivered_filter_amount": "Colete livrate: număr",
-          "include_history": "Include istoricul stării",
-          "refresh_interval": "Actualizează la fiecare"
+          "include_history": "Include istoricul stării"
         }
       }
     },
@@ -83,15 +73,6 @@
     }
   },
   "selector": {
-    "refresh_interval": {
-      "options": {
-        "15": "15 minute",
-        "30": "30 de minute",
-        "60": "60 de minute",
-        "120": "120 de minute",
-        "240": "240 de minute"
-      }
-    },
     "delivered_filter_type": {
       "options": {
         "days": "Zile",

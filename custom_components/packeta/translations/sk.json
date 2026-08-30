@@ -45,15 +45,6 @@
             "data_description": {
               "include_history": "Pridá k zásielke atribút histórie s každou zmenou stavu (čas, stav, pôvodný text). V predvolenom nastavení vypnuté."
             }
-          },
-          "polling": {
-            "name": "Aktualizácia",
-            "data": {
-              "refresh_interval": "Aktualizovať každých"
-            },
-            "data_description": {
-              "refresh_interval": "Ako často integrácia kontroluje Packetu ohľadom aktualizácií zásielok. Dlhší interval je šetrnejší k API Packety; predvolená hodnota 30 minút stačí pre väčšinu zásielok."
-            }
           }
         },
         "menu_options": {
@@ -72,8 +63,7 @@
         "data": {
           "delivered_filter_type": "Doručené zásielky: filtrovať podľa",
           "delivered_filter_amount": "Doručené zásielky: množstvo",
-          "include_history": "Zahrnúť históriu stavu",
-          "refresh_interval": "Obnoviť každých"
+          "include_history": "Zahrnúť históriu stavu"
         }
       }
     },
@@ -83,15 +73,6 @@
     }
   },
   "selector": {
-    "refresh_interval": {
-      "options": {
-        "15": "15 minút",
-        "30": "30 minút",
-        "60": "60 minút",
-        "120": "120 minút",
-        "240": "240 minút"
-      }
-    },
     "delivered_filter_type": {
       "options": {
         "days": "Dni",

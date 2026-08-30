@@ -45,15 +45,6 @@
             "data_description": {
               "include_history": "Hozzáad egy csomagonkénti előzményattribútumot, amely felsorolja az egyes állapotfrissítéseket (időbélyeg, állapot, eredeti szöveg). Alapértelmezés szerint kikapcsolva."
             }
-          },
-          "polling": {
-            "name": "Lekérdezés",
-            "data": {
-              "refresh_interval": "Frissítés gyakorisága"
-            },
-            "data_description": {
-              "refresh_interval": "Milyen gyakran ellenőrzi az integráció a Packetánál a csomagfrissítéseket. A hosszabb időköz kíméletesebb a Packeta API-jához; az alapértelmezett 30 perc a legtöbb csomaghoz elegendő."
-            }
           }
         },
         "menu_options": {
@@ -72,8 +63,7 @@
         "data": {
           "delivered_filter_type": "Kézbesített csomagok: szűrés",
           "delivered_filter_amount": "Kézbesített csomagok: darabszám",
-          "include_history": "Állapotelőzmények megjelenítése",
-          "refresh_interval": "Frissítés ennyi időnként"
+          "include_history": "Állapotelőzmények megjelenítése"
         }
       }
     },
@@ -83,15 +73,6 @@
     }
   },
   "selector": {
-    "refresh_interval": {
-      "options": {
-        "15": "15 perc",
-        "30": "30 perc",
-        "60": "60 perc",
-        "120": "120 perc",
-        "240": "240 perc"
-      }
-    },
     "delivered_filter_type": {
       "options": {
         "days": "Napok",

@@ -64,11 +64,30 @@ map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
 ## Options and reloads — account-less model
 
 The options flow is one sectioned form; changes apply without a restart.
-Account-less carriers (this one) use the **update-listener** model (retunes
-`coordinator.update_interval` + `async_request_refresh()`). Account-based carriers
-instead call `async_schedule_reload` with **no** listener (combining the two is
-deprecated, error in HA 2026.12+). The user-tunable poll interval is a deliberate
-HACS divergence (see CONVENTIONS.md).
+Account-less carriers (this one) use the **update-listener** model (an
+`async_request_refresh()` call on option change — no interval retuning left
+to do, since polling is dynamic and recomputes itself at the end of every
+refresh, see *Polling* below). Account-based carriers instead call
+`async_schedule_reload` with **no** listener (combining the two is
+deprecated, error in HA 2026.12+). This is also the resume path after
+polling has fully suspended: adding a parcel back triggers the same refresh,
+which recomputes the tier and re-arms scheduling.
+
+## Polling
+
+Polling is dynamic and status-driven, unconditionally — there is no
+user-facing interval option and never has been one since the 2026-08-30
+conversion (`carrier-research/dynamic-polling.md`). The coordinator
+recomputes its own cadence at the end of every refresh: a quiet window
+(00:00–06:00 local, with catch-up anchors at each end), a 15-minute hot tier
+when a tracked parcel is `out_for_delivery` (immediately, or from an hour
+before `planned_from` — moot in practice here, since Packeta reports neither
+`out_for_delivery` nor an ETA on any real payload, see *Carrier-specific
+decisions* above), a 45-minute mid tier otherwise, and a full stop
+(`update_interval = None`) when nothing is tracked or everything tracked is
+delivered. See `coordinator.py`'s `_hottest_tier_minutes` /
+`_next_update_interval` and `ha-carrier-template`'s
+`example_carrier/coordinator.py` for the canonical shape this mirrors.
 
 ## Module layout
 
