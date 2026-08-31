@@ -293,12 +293,18 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     # coordinator asked for (it injects ``trackingNumber`` on the pending
     # placeholder for a not-yet-scanned parcel).
     barcode = raw.get("barcode") or raw.get("trackingNumber")
+    # ``branchAddress`` names the assigned pickup point and is present as
+    # soon as a parcel is routed there — regardless of status, not just once
+    # it arrives (``at_pickup_point`` covers arrival). Confirmed against real
+    # parcels: every sample seen went through a pickup point (``courierId:
+    # "0"``); a courier-delivered parcel is expected to omit it, but that
+    # shape is still unconfirmed (see carrier-research/packeta/packeta.md).
+    pickup = bool(raw.get("branchAddress"))
 
     status_code = raw.get("packetStatusId")
     status_code = str(status_code) if status_code is not None else None
     status = map_parcel_status(status_code)
     delivered = status is ParcelStatus.DELIVERED
-    at_pickup = status is ParcelStatus.AT_PICKUP_POINT
 
     events = raw.get("trackingDetails") or []
     # No delivered-at field; the delivery moment is the newest event's time.
@@ -312,16 +318,16 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "sender": raw.get("sender") or None,
         "receiver": None,
         "status": status,
-        # No top-level status text; the carrier's own status token is the
-        # numeric ``packetStatusId`` (the human, localised text lives in
-        # ``history``).
-        "raw_status": status_code,
+        # The carrier's own status text, e.g. "The package is on its way" —
+        # ``packetStatusId`` (the numeric code) drives the ``status`` mapping
+        # above but is not itself carrier-facing text.
+        "raw_status": raw.get("packetStatus") or status_code,
         "delivered": delivered,
         "delivered_at": delivered_at,
         # Packeta's consumer endpoint carries no delivery-window estimate.
         "planned_from": None,
         "planned_to": None,
-        "pickup": at_pickup,
+        "pickup": pickup,
         # Confirmed against a real parcel: ``item.branchAddress`` names the
         # assigned pickup point (e.g. a Z-BOX or partner shop) and is present
         # regardless of status, not just while AT_PICKUP_POINT.

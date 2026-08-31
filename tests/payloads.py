@@ -4,7 +4,8 @@ These reproduce the ``item`` object the keyless ``getPacketById`` endpoint
 returns on success. Confirmed live against real delivered parcels 2026-08-19
 (values below are fictional placeholders, not the real payload — see
 carrier-research/packeta/ for that): ``barcode``, ``packetStatusId``,
-``sender``, ``branchAddress`` and ``trackingDetails: [{text, time}]``.
+``packetStatus``, ``sender``, ``branchAddress`` and
+``trackingDetails: [{text, time}]``.
 ``trackingDetails`` events carry only human ``text`` and a naive,
 space-separated ``time`` string (``"YYYY-MM-DD HH:MM:SS"``, no offset) — and
 there is no per-event status code. The other five ``packetStatusId`` values
@@ -27,6 +28,7 @@ def delivered_sample(code: str = DELIVERED_CODE) -> dict:
     return {
         "barcode": code,
         "packetStatusId": "3",
+        "packetStatus": "The package has been delivered",
         "sender": "Example Sender s.r.o.",
         "branchAddress": "Example Pickup Point, Example Street 1",
         "trackingDetails": [
@@ -42,6 +44,7 @@ def active_sample(code: str = ACTIVE_CODE) -> dict:
     """An on-the-way parcel (packetStatusId 31 → in transit)."""
     sample = delivered_sample(code)
     sample["packetStatusId"] = "31"
+    sample["packetStatus"] = "The package is on its way"
     sample["trackingDetails"] = sample["trackingDetails"][:2]
     return sample
 
@@ -50,5 +53,6 @@ def pickup_sample(code: str = ACTIVE_CODE) -> dict:
     """A parcel ready for collection at a pickup point (packetStatusId 2)."""
     sample = delivered_sample(code)
     sample["packetStatusId"] = "2"
+    sample["packetStatus"] = "Ready for pickup at the branch"
     sample["trackingDetails"] = sample["trackingDetails"][:3]
     return sample

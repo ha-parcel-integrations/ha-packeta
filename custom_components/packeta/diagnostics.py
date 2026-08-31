@@ -18,6 +18,7 @@ TO_REDACT = {
     "sender",
     "receiver",
     "url",
+    "pickup_point",
     # Packeta payload fields (``item``)
     "barcode",           # the tracking number
     "trackingNumber",    # coordinator's injected fallback key

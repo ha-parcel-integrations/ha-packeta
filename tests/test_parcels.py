@@ -211,9 +211,8 @@ def test_normalize_delivered_parcel():
     assert parcel["sender"] == "Example Sender s.r.o."
     assert parcel["receiver"] is None  # Packeta never names the recipient
     assert parcel["status"] == ParcelStatus.DELIVERED
-    # raw_status is the carrier's own status token (the numeric packetStatusId);
-    # the human text lives in history.
-    assert parcel["raw_status"] == "3"
+    # raw_status is the carrier's own status text (packetStatus).
+    assert parcel["raw_status"] == "The package has been delivered"
     assert parcel["delivered"] is True
     # delivered_at is the newest event's time, anchored to Europe/Prague.
     assert parcel["delivered_at"] == "2026-04-29T13:12:42+02:00"
@@ -226,6 +225,9 @@ def test_normalize_delivered_parcel():
     assert parcel["history"] is None  # opt-in, default off
     # Confirmed against a real parcel: item.branchAddress names the pickup point.
     assert parcel["pickup_point"] == "Example Pickup Point, Example Street 1"
+    # pickup means "headed to a pickup point", independent of delivered/in
+    # transit/at_pickup_point — driven by branchAddress, not status.
+    assert parcel["pickup"] is True
 
 
 def test_normalize_history_is_opt_in():
@@ -243,6 +245,24 @@ def test_normalize_active_parcel_has_no_window():
     assert parcel["planned_to"] is None
 
 
+def test_normalize_pickup_true_before_arrival():
+    """pickup reflects "headed to a pickup point", not just "arrived there".
+
+    Regression test: a parcel still in_transit but already routed to a
+    branch (branchAddress populated) must report pickup=True — reported in
+    https://github.com/ha-parcel-integrations/ha-packeta/issues/6.
+    """
+    parcel = normalize_parcel(active_sample())
+    assert parcel["status"] == ParcelStatus.IN_TRANSIT
+    assert parcel["pickup"] is True
+
+
+def test_normalize_raw_status_falls_back_to_code_without_packet_status():
+    raw = delivered_sample()
+    del raw["packetStatus"]
+    assert normalize_parcel(raw)["raw_status"] == "3"
+
+
 def test_normalize_pickup_parcel():
     parcel = normalize_parcel(pickup_sample())
     assert parcel["status"] == ParcelStatus.AT_PICKUP_POINT
@@ -255,7 +275,9 @@ def test_normalize_pickup_point_absent_is_none():
     """A payload without branchAddress (e.g. a courier-delivered parcel) stays None."""
     raw = pickup_sample()
     del raw["branchAddress"]
-    assert normalize_parcel(raw)["pickup_point"] is None
+    parcel = normalize_parcel(raw)
+    assert parcel["pickup_point"] is None
+    assert parcel["pickup"] is False
 
 
 def test_normalize_pending_placeholder():
