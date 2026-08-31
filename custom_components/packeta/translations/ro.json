@@ -126,6 +126,10 @@
         "name": "Colete în curs de livrare",
         "unit_of_measurement": "colete"
       },
+      "awaiting_pickup": {
+        "name": "În așteptarea ridicării",
+        "unit_of_measurement": "colete"
+      },
       "next_delivery": {
         "name": "Următoarea livrare"
       },

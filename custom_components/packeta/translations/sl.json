@@ -126,6 +126,10 @@
         "name": "Prihajajoči paketi",
         "unit_of_measurement": "paketov"
       },
+      "awaiting_pickup": {
+        "name": "Čaka na prevzem",
+        "unit_of_measurement": "paketov"
+      },
       "next_delivery": {
         "name": "Naslednja dostava"
       },
