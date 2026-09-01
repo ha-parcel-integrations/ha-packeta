@@ -1,4 +1,4 @@
-# Packeta Parcel Tracker
+# Packeta & Zásilkovna — Parcel Tracker
 
 [![Release](https://img.shields.io/github/v/release/ha-parcel-integrations/ha-packeta.svg)](https://github.com/ha-parcel-integrations/ha-packeta/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
