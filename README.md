@@ -141,6 +141,8 @@ The `status` field is the carrier-agnostic enum shared by the whole integration 
 
 Packeta's own status is a numeric code internally, but `raw_status` carries its localised human text (e.g. "The package is on its way") — the same text shown on the Packeta tracking page. The shared enum also defines `out_for_delivery` and `returning`; no verified Packeta code maps to those yet, so an unmapped status surfaces as `unknown` and asks you to [report it](https://github.com/ha-parcel-integrations/ha-packeta/issues/new?template=unrecognised_status.yml) — that is how the map grows.
 
+Individual `history` entries carry no status code from Packeta at all — only an English sentence (e.g. "The parcel is ready for pickup."). A recognised sentence still gets a canonical `status` on that entry; an unrecognised one keeps `status: null` and logs a one-shot warning so new wording can be added.
+
 ## Events
 
 The integration fires these on the event bus (also available as device triggers on the Packeta device):

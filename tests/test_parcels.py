@@ -141,10 +141,66 @@ def test_format_dimensions_needs_all_three_axes():
 def test_build_history_orders_oldest_to_newest():
     history = build_history(delivered_sample()["trackingDetails"])
     assert len(history) == 4
-    assert history[0]["raw_status"] == "Parcel data received"
-    assert history[-1]["raw_status"] == "Delivered to the recipient"
-    # Packeta events carry no per-event status code.
-    assert all(entry["status"] is None for entry in history)
+    assert history[0]["raw_status"].startswith("We are aware of your parcel")
+    assert history[-1]["raw_status"].startswith("The parcel is with you")
+
+
+def test_build_history_maps_known_canned_sentences():
+    """Packeta events carry no per-event code, but the sentences are canned
+    templates — a known one still maps to a canonical status."""
+    history = build_history(delivered_sample()["trackingDetails"])
+    assert [entry["status"] for entry in history] == [
+        ParcelStatus.REGISTERED,
+        ParcelStatus.IN_TRANSIT,
+        ParcelStatus.AT_PICKUP_POINT,
+        ParcelStatus.DELIVERED,
+    ]
+
+
+def test_build_history_unrecognised_sentence_stays_null(caplog):
+    history = build_history([event("A brand new carrier sentence.", "2026-04-24T10:00:00Z")])
+    assert history[0]["status"] is None
+    assert "Unrecognised Packeta history text" in caplog.text
+    assert "issues/new" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        (
+            "The parcel has been assigned a tracking number: "
+            '<a href="https://example-carrier.test/x">EXAMPLE0000001</a> and '
+            "will soon be handed over to the carrier.",
+            ParcelStatus.REGISTERED,
+        ),
+        (
+            "The parcel has been handed over to the carrier. Tracking "
+            'number: <a href="https://example-carrier.test/x">EXAMPLE0000001</a>',
+            ParcelStatus.IN_TRANSIT,
+        ),
+        (
+            "Your parcel has arrived at the depot Example Town, Example "
+            "Street 12. We’re now preparing it for delivery.",
+            ParcelStatus.IN_TRANSIT,
+        ),
+        (
+            "We are investigating the status of the parcel and will "
+            "update it here as soon as possible",
+            ParcelStatus.PROBLEM,
+        ),
+    ],
+)
+def test_build_history_maps_reshipper_and_exception_sentences(text, expected):
+    """Zásilkovna hands cross-border parcels to a local final-mile carrier —
+    those events, and its own exception wording, are canned too."""
+    assert build_history([event(text, "2026-04-24T10:00:00Z")])[0]["status"] == expected
+
+
+def test_build_history_administrative_note_stays_unmapped():
+    """"Customer was informed ..." carries no status of its own — deliberately
+    left unmapped rather than guessed."""
+    text = "Customer was informed about the actual parcel status via individual message"
+    assert build_history([event(text, "2026-04-24T10:00:00Z")])[0]["status"] is None
 
 
 def test_build_history_caps_to_max_events():
@@ -233,7 +289,7 @@ def test_normalize_delivered_parcel():
 def test_normalize_history_is_opt_in():
     parcel = normalize_parcel(delivered_sample(), include_history=True)
     assert len(parcel["history"]) == 4
-    assert parcel["history"][0]["raw_status"] == "Parcel data received"
+    assert parcel["history"][0]["raw_status"].startswith("We are aware of your parcel")
 
 
 def test_normalize_active_parcel_has_no_window():

@@ -186,6 +186,53 @@ def format_dimensions(
     }
 
 
+# No per-event status code, only a sentence — but real parcels confirmed the
+# sentences are canned templates, and locale is hardcoded to English
+# (``TRACKING_LOCALE``), so a fixed substring match is safe. Also covers
+# Zásilkovna's cross-border handoff to a local carrier (DHL NL, ACS Courier,
+# FAN Courier RO, Orlen Paczka seen) — "handed over" appears in both the
+# announced and completed sentences, matched on the differing wording.
+_EVENT_TEXT_MAP: tuple[tuple[str, ParcelStatus], ...] = (
+    ("aware of your parcel and are waiting for the sender", ParcelStatus.REGISTERED),
+    ("assigned a tracking number", ParcelStatus.REGISTERED),
+    ("successfully received the parcel for transport", ParcelStatus.IN_TRANSIT),
+    ("on its way to the depot", ParcelStatus.IN_TRANSIT),
+    ("arrived at the depot", ParcelStatus.IN_TRANSIT),
+    ("has been handed over to the carrier", ParcelStatus.IN_TRANSIT),
+    ("on its way to you", ParcelStatus.OUT_FOR_DELIVERY),
+    ("ready for pickup", ParcelStatus.AT_PICKUP_POINT),
+    ("the parcel is with you", ParcelStatus.DELIVERED),
+    ("investigating the status of the parcel", ParcelStatus.PROBLEM),
+)
+
+# One-shot log dedup, keyed on the text itself (no code to key on here).
+_unmapped_event_texts_logged: set[str] = set()
+
+
+def _map_event_text(text: str | None) -> ParcelStatus | None:
+    """Map a Packeta history sentence to a canonical status, or ``None``.
+
+    An unrecognised sentence keeps ``status: null`` (same contract as
+    :func:`map_event_status`) and warns once per distinct sentence.
+    """
+    if not text:
+        return None
+    lowered = text.lower()
+    for needle, status in _EVENT_TEXT_MAP:
+        if needle in lowered:
+            return status
+    if text not in _unmapped_event_texts_logged:
+        _unmapped_event_texts_logged.add(text)
+        _LOGGER.warning(
+            "Unrecognised Packeta history text — help us map it. Open an "
+            "issue and paste this line: %s\n  text=%r → history status stays "
+            "'null'",
+            NEW_ISSUE_URL,
+            text,
+        )
+    return None
+
+
 # Packeta's event ``time`` format is confirmed (see ``_PRAGUE`` above), so a
 # value that still doesn't parse is a genuine anomaly rather than an expected
 # gap — it means ``delivered_at`` and event ordering silently fall back for
@@ -219,9 +266,10 @@ def build_history(
     aggregator's ``strip_raw()``. Packeta's ``trackingDetails`` events carry
     only ``text`` (human, localised) and ``time`` (a naive, space-separated
     string — confirmed against a real parcel, see ``_PRAGUE``) — there is no
-    per-event status code, so every entry keeps ``status = None`` and
-    ``raw_status = text``. Sorted oldest → newest; events whose ``time`` does
-    not match the confirmed shape are kept last rather than dropped.
+    per-event status code, so ``status`` is derived from the sentence itself
+    via :func:`_map_event_text` (``None`` for a sentence we don't recognise).
+    Sorted oldest → newest; events whose ``time`` does not match the confirmed
+    shape are kept last rather than dropped.
     """
     parseable: list[tuple[datetime, dict]] = []
     unparseable: list[dict] = []
@@ -231,10 +279,11 @@ def build_history(
         timestamp = to_iso_timestamp(event.get("time"))
         if not timestamp:
             continue
+        text = event.get("text") or None
         entry = {
             "timestamp": timestamp,
-            "status": None,
-            "raw_status": event.get("text") or None,
+            "status": _map_event_text(text),
+            "raw_status": text,
         }
         parsed = parse_iso(timestamp)
         if parsed is None:

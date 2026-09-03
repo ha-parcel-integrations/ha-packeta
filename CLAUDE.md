@@ -40,6 +40,11 @@ them here.
 ## Carrier-specific decisions (integration only)
 
 Packeta is a **pickup-point / locker network — 100% parcels**, no mail surface.
+It also acts as a **cross-border reshipper**, handing parcels to a downstream
+final-mile carrier (DHL Parcel NL, ACS Courier, FAN Courier RO, Orlen Paczka
+all seen) — `trackingDetails` events then name that carrier and embed an
+`<a href>` to its own tracking page, while Packeta's own `packetStatusId`/
+top-level `status` keep tracking the parcel through the handover.
 **Status: confirmed against real delivered parcels (2026-08-19).** The success
 payload shape, the `packetStatusId: "3"` (delivered) mapping, the naive
 space-separated `trackingDetails[].time` shape, `sender` and `branchAddress`
@@ -52,7 +57,11 @@ map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
 - **No ETA** — `planned_from`/`planned_to` always `None`, so the next-delivery
   sensor and calendar stay inert and `packeta_parcel_delivery_time_changed` never
   fires (machinery kept for parity, exercised white-box). There is no per-event
-  status code, so every history entry keeps `status = None`. **`None` on purpose:**
+  status code — history sentences are matched against `_EVENT_TEXT_MAP` in
+  `parcels.py` instead (they're canned templates); an unrecognised sentence
+  keeps `status = None` and warns once. Safe to match on a fixed English
+  substring regardless of the account holder's language, since
+  `TRACKING_LOCALE` is hardcoded to `"en"`. **`None` on purpose:**
   `receiver`, `weight`, `dimensions` — not in the payload. `sender` and
   `pickup_point` are now populated (`item.sender` / `item.branchAddress`).
   `trackingDetails[].time` is naive and anchored to `Europe/Prague` (Packeta is

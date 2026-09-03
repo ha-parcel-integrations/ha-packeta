@@ -8,8 +8,11 @@ carrier-research/packeta/ for that): ``barcode``, ``packetStatusId``,
 ``trackingDetails: [{text, time}]``.
 ``trackingDetails`` events carry only human ``text`` and a naive,
 space-separated ``time`` string (``"YYYY-MM-DD HH:MM:SS"``, no offset) — and
-there is no per-event status code. The other five ``packetStatusId`` values
-remain reconstructed from the maintained client ``itsvic-dev/deliveries``.
+there is no per-event status code. The event sentences below are the real
+canned wording confirmed live, used verbatim so the ``_EVENT_TEXT_MAP``
+substring matches exercise real text rather than paraphrases. The other five
+``packetStatusId`` values remain reconstructed from the maintained client
+``itsvic-dev/deliveries``.
 """
 from __future__ import annotations
 
@@ -32,10 +35,24 @@ def delivered_sample(code: str = DELIVERED_CODE) -> dict:
         "sender": "Example Sender s.r.o.",
         "branchAddress": "Example Pickup Point, Example Street 1",
         "trackingDetails": [
-            event("Parcel data received", "2026-04-27 23:03:58"),
-            event("On the way", "2026-04-28 15:52:17"),
-            event("Ready for pickup", "2026-04-29 08:46:00"),
-            event("Delivered to the recipient", "2026-04-29 13:12:42"),
+            event(
+                "We are aware of your parcel and are waiting for the sender "
+                "to hand it over to us.",
+                "2026-04-27 23:03:58",
+            ),
+            event(
+                "The parcel is currently on its way to the depot.",
+                "2026-04-28 15:52:17",
+            ),
+            event(
+                "The parcel is ready for pickup. Z-BOX Example Street 1",
+                "2026-04-29 08:46:00",
+            ),
+            event(
+                "The parcel is with you. Thank you, and we look forward to "
+                "next time.",
+                "2026-04-29 13:12:42",
+            ),
         ],
     }
 
