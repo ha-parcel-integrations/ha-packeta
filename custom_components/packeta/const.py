@@ -58,9 +58,8 @@ CAPABILITIES = frozenset({"url", "history", "pickup_point"})
 # Verified live 2026-07-26 (404 on a fake number). The success payload shape
 # and the ``packetStatusId`` map were reconstructed from the maintained client
 # ``itsvic-dev/deliveries`` and confirmed live against real delivered parcels
-# 2026-08-19 — see carrier-research/packeta/. The other five status ids remain
-# reconstructed only. Rate limiting is still unmeasured; revisit
-# ``--interval fixed`` if it throttles.
+# 2026-08-19. The other five status ids remain reconstructed only. Rate
+# limiting is still unmeasured; revisit ``--interval fixed`` if it throttles.
 TRACKING_API_URL = (
     "https://tracking.packeta.com/api/getPacketById/{tracking_code}/{locale}"
 )
@@ -82,8 +81,7 @@ DEFAULT_DELIVERED_FILTER_TYPE = "days"
 DEFAULT_DELIVERED_FILTER_AMOUNT = 7
 
 # Dynamic, status-driven polling — unconditional, no user-facing interval
-# option. See carrier-research/dynamic-polling.md for the full algorithm and
-# the reasoning behind it.
+# option.
 #
 # Quiet window: no polling between these local hours except the two anchors
 # below, for overnight / end-of-day catch-up.

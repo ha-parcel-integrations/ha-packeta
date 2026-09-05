@@ -347,7 +347,7 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     # it arrives (``at_pickup_point`` covers arrival). Confirmed against real
     # parcels: every sample seen went through a pickup point (``courierId:
     # "0"``); a courier-delivered parcel is expected to omit it, but that
-    # shape is still unconfirmed (see carrier-research/packeta/packeta.md).
+    # shape is still unconfirmed.
     pickup = bool(raw.get("branchAddress"))
 
     status_code = raw.get("packetStatusId")
