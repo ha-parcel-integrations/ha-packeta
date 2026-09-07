@@ -1,6 +1,9 @@
 {
-  "name": "Packeta & Zásilkovna",
+  "name": "Packeta & Z\u00e1silkovna",
   "content_in_root": false,
+  "zip_release": true,
+  "filename": "packeta.zip",
+  "hide_default_branch": true,
   "render_readme": true,
   "homeassistant": "2024.12.0"
 }
