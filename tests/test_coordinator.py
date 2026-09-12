@@ -72,7 +72,7 @@ def _force_out_for_delivery(raw: dict, **kwargs) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Dynamic polling (dynamic-polling.md Section 2.1, barcode-based) — pure
+# Dynamic polling (barcode-based) — pure
 # helpers
 # ---------------------------------------------------------------------------
 
