@@ -30,16 +30,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Packeta tracking numbers are the "Z" barcodes printed on the parcel / shipping
-# confirmation — a ``Z`` followed by ~10 digits, often shown spaced
-# ("Z 1234 5678 90"). The endpoint accepts the ``Z``-prefixed form as-is (a fake
-# one returns a clean "not found"), and ``normalize_tracking_code`` strips the
-# spaces, so the regex stays generous (upper-case alphanumeric, 6-30 chars)
-# rather than tight — a false negative is worse than a bad code that simply
-# comes back "not found" on the next poll. This same regex gates the
-# ``track_parcel`` service and the e-mail-parsing example.
-_TRACKING_CODE_RE = re.compile(r"^[A-Z0-9]{6,30}$")
-
 
 def normalize_tracking_code(value: str) -> str:
     """Return the tracking code upper-cased with separators stripped.
@@ -52,8 +42,13 @@ def normalize_tracking_code(value: str) -> str:
 
 
 def valid_tracking_code(value: str) -> bool:
-    """Whether ``value`` looks like a Packeta tracking code."""
-    return bool(_TRACKING_CODE_RE.match(value))
+    """Accept every non-empty code.
+
+    Packeta's real tracking-number shapes vary too much and are not fully
+    confirmed, and an unrecognised code just comes back "not found" from the
+    API anyway.
+    """
+    return bool(value)
 
 
 def _current_parcels(entry: ConfigEntry) -> list[dict[str, str]]:
