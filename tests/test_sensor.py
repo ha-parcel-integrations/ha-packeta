@@ -9,6 +9,8 @@ from custom_components.packeta.sensor import (
     PacketaIncomingParcelsSensor,
     PacketaLastUpdateSensor,
     PacketaNextDeliverySensor,
+    PacketaOutgoingDeliveredParcelsSensor,
+    PacketaOutgoingParcelsSensor,
     PacketaParcelSensor,
 )
 
@@ -19,10 +21,19 @@ def _entry(entry_id: str = "e1") -> MagicMock:
     return entry
 
 
-def _coordinator(data: list[dict], delivered: list[dict] | None = None) -> MagicMock:
+def _coordinator(
+    data: list[dict],
+    delivered: list[dict] | None = None,
+    outgoing: list[dict] | None = None,
+    delivered_outgoing: list[dict] | None = None,
+) -> MagicMock:
     coordinator = MagicMock()
     coordinator.data = data
     coordinator.delivered = delivered if delivered is not None else []
+    coordinator.outgoing = outgoing if outgoing is not None else []
+    coordinator.delivered_outgoing = (
+        delivered_outgoing if delivered_outgoing is not None else []
+    )
     return coordinator
 
 
@@ -117,3 +128,42 @@ def test_last_update_sensor():
     coordinator.last_success_time = moment
     sensor = PacketaLastUpdateSensor(coordinator, _entry())
     assert sensor.native_value == moment
+
+
+def test_outgoing_sensors_count_only_sent_parcels():
+    coordinator = _coordinator(
+        [_parcel("A")],
+        delivered=[_parcel("B", status=ParcelStatus.DELIVERED)],
+        outgoing=[_parcel("C")],
+        delivered_outgoing=[_parcel("D", status=ParcelStatus.DELIVERED)],
+    )
+    active = PacketaOutgoingParcelsSensor(coordinator, _entry())
+    delivered = PacketaOutgoingDeliveredParcelsSensor(coordinator, _entry())
+
+    assert active.native_value == 1
+    assert active.extra_state_attributes["parcels"][0]["barcode"] == "C"
+    assert delivered.native_value == 1
+    assert delivered.extra_state_attributes["parcels"][0]["barcode"] == "D"
+
+
+def test_incoming_count_excludes_outgoing_parcels():
+    """The reported bug: a parcel the user sent inflated the incoming count."""
+    coordinator = _coordinator([_parcel("A")], outgoing=[_parcel("C")])
+    sensor = PacketaIncomingParcelsSensor(coordinator, _entry(), lambda _: None, set())
+    assert sensor.native_value == 1
+    assert sensor.extra_state_attributes["parcels"][0]["barcode"] == "A"
+
+
+def test_awaiting_pickup_ignores_outgoing_parcels():
+    """A parcel at its recipient's pickup point is not one for the user to collect."""
+    sent = _parcel("C", ParcelStatus.AT_PICKUP_POINT, pickup=True)
+    sensor = PacketaAwaitingPickupSensor(_coordinator([], outgoing=[sent]), _entry())
+    assert sensor.native_value == 0
+
+
+def test_next_delivery_ignores_outgoing_parcels():
+    coordinator = _coordinator(
+        [], outgoing=[_parcel("C", planned_from="2026-05-01T10:00:00Z")]
+    )
+    sensor = PacketaNextDeliverySensor(coordinator, _entry())
+    assert sensor.native_value is None

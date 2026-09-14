@@ -23,8 +23,10 @@ from homeassistant.config_entries import ConfigEntry
 from .const import (
     CONF_DELIVERED_FILTER_AMOUNT,
     CONF_DELIVERED_FILTER_TYPE,
+    CONF_DIRECTION,
     DEFAULT_DELIVERED_FILTER_AMOUNT,
     DEFAULT_DELIVERED_FILTER_TYPE,
+    DEFAULT_DIRECTION,
     HISTORY_MAX_EVENTS,
     TRACKING_URL,
     ParcelStatus,
@@ -388,6 +390,16 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         "history": build_history(events) if include_history else None,
         "raw": raw,
     }
+
+
+def tracked_direction(item: dict) -> str:
+    """Return the declared direction of one tracked-parcel options entry.
+
+    Entries stored before the option existed carry no ``direction`` key, so
+    they default to incoming rather than forcing an options migration for a
+    single field.
+    """
+    return item.get(CONF_DIRECTION) or DEFAULT_DIRECTION
 
 
 def sort_parcels_by_ts(

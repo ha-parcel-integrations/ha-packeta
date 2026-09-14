@@ -19,14 +19,18 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_DELIVERED_FILTER_AMOUNT,
     CONF_DELIVERED_FILTER_TYPE,
+    CONF_DIRECTION,
     CONF_INCLUDE_HISTORY,
     CONF_PARCELS,
     CONF_TRACKING_CODE,
     DEFAULT_DELIVERED_FILTER_AMOUNT,
     DEFAULT_DELIVERED_FILTER_TYPE,
     DEFAULT_INCLUDE_HISTORY,
+    DIRECTION_INCOMING,
+    DIRECTION_OUTGOING,
     DOMAIN,
 )
+from .parcels import tracked_direction
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -98,12 +102,14 @@ class PacketaConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class PacketaOptionsFlowHandler(OptionsFlow):
-    """Manage tracked parcels, history and polling in one sectioned form.
+    """Manage tracked parcels and integration settings from one menu.
 
-    Mirrors the other suite carriers' section layout (here: ``parcels`` /
-    ``delivered`` / ``history`` / ``polling``). Changes apply live via HA's
-    options-update listener (which refreshes the coordinator), so new/removed
-    per-parcel sensors appear and disappear immediately.
+    Incoming and outgoing parcels get a menu entry each, both opening the same
+    list editor: this carrier is account-less and its payload cannot tell the
+    two directions apart, so the user declares it by filing a code in one list
+    or the other. Changes apply live via HA's options-update listener (which
+    refreshes the coordinator), so new/removed per-parcel sensors appear and
+    disappear immediately.
     """
 
     async def async_step_init(
@@ -111,13 +117,34 @@ class PacketaOptionsFlowHandler(OptionsFlow):
     ) -> ConfigFlowResult:
         """Offer parcel management separately from integration settings."""
         return self.async_show_menu(
-            step_id="init", menu_options=["parcels", "settings"]
+            step_id="init",
+            menu_options=["incoming_parcels", "outgoing_parcels", "settings"],
         )
 
-    async def async_step_parcels(
+    async def async_step_incoming_parcels(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Show and handle the complete tracked-code list."""
+        """Show and handle the tracked-code list for parcels being received."""
+        return await self._async_step_parcel_list(DIRECTION_INCOMING, user_input)
+
+    async def async_step_outgoing_parcels(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Show and handle the tracked-code list for parcels being sent."""
+        return await self._async_step_parcel_list(DIRECTION_OUTGOING, user_input)
+
+    async def _async_step_parcel_list(
+        self, direction: str, user_input: dict[str, Any] | None
+    ) -> ConfigFlowResult:
+        """Show and handle one direction's complete tracked-code list.
+
+        Both directions share a single ``CONF_PARCELS`` list, so a submission
+        replaces this direction's entries and leaves the other direction's
+        alone — except for a code submitted here that was filed the other way,
+        which moves rather than being rejected: re-entering a code in the
+        other list is how a user corrects a parcel they filed wrongly.
+        """
+        step_id = f"{direction}_parcels"
         errors: dict[str, str] = {}
         if user_input is not None:
             codes = list(
@@ -130,16 +157,28 @@ class PacketaOptionsFlowHandler(OptionsFlow):
             if any(not valid_tracking_code(code) for code in codes):
                 errors["base"] = "invalid_tracking_code"
             else:
+                kept = [
+                    parcel
+                    for parcel in _current_parcels(self.config_entry)
+                    if tracked_direction(parcel) != direction
+                    and parcel.get(CONF_TRACKING_CODE) not in codes
+                ]
                 return self.async_create_entry(
                     title="",
                     data={
                         **self.config_entry.options,
-                        CONF_PARCELS: [{CONF_TRACKING_CODE: code} for code in codes],
+                        CONF_PARCELS: kept
+                        + [
+                            {CONF_TRACKING_CODE: code, CONF_DIRECTION: direction}
+                            for code in codes
+                        ],
                     },
                 )
 
         current_codes = [
-            parcel[CONF_TRACKING_CODE] for parcel in _current_parcels(self.config_entry)
+            parcel[CONF_TRACKING_CODE]
+            for parcel in _current_parcels(self.config_entry)
+            if tracked_direction(parcel) == direction
         ]
         schema = vol.Schema(
             {
@@ -149,7 +188,7 @@ class PacketaOptionsFlowHandler(OptionsFlow):
             }
         )
         return self.async_show_form(
-            step_id="parcels",
+            step_id=step_id,
             data_schema=self.add_suggested_values_to_schema(
                 schema, {"tracking_codes": current_codes}
             ),

@@ -24,6 +24,7 @@ from .const import (
     CONF_PARCELS,
     CONF_TRACKING_CODE,
     DEFAULT_INCLUDE_HISTORY,
+    DIRECTION_OUTGOING,
     DOMAIN,
     HOT_INTERVAL_MINUTES,
     HOT_LOOKAHEAD_HOURS,
@@ -33,7 +34,12 @@ from .const import (
     STAGGER_MINUTES,
     ParcelStatus,
 )
-from .parcels import apply_delivered_filter, normalize_parcel, sort_parcels_by_ts
+from .parcels import (
+    apply_delivered_filter,
+    normalize_parcel,
+    sort_parcels_by_ts,
+    tracked_direction,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -119,7 +125,10 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
     This carrier has no account or parcel feed, so the tracked parcels are the
     tracking codes the user entered (stored in the entry options). Each is
     fetched individually and merged into one list; ``coordinator.data`` is the
-    active (not-yet-delivered) parcels, ``self.delivered`` the rest.
+    active (not-yet-delivered) incoming parcels, ``self.delivered`` the rest,
+    and ``self.outgoing`` / ``self.delivered_outgoing`` the same split for the
+    parcels the user is sending. The direction comes from the options entry
+    the code was filed under — Packeta's payload cannot supply it.
     """
 
     def __init__(
@@ -143,6 +152,8 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
         )
         self._client = client
         self.delivered: list[dict] = []
+        self.outgoing: list[dict] = []
+        self.delivered_outgoing: list[dict] = []
         # tracking_code -> last successful raw payload, so a transient fetch
         # failure or a not-found blip keeps the parcel visible instead of
         # dropping its sensor. Lives for the integration's lifetime (resets on
@@ -159,6 +170,7 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
         # that already existed when the integration started — otherwise every
         # restart would flood users with "registered" notifications.
         self._known_state: dict[str, ParcelStatus] | None = None
+        self._known_outgoing_state: dict[str, ParcelStatus] | None = None
         self._known_delivery_times: (
             dict[str, tuple[str | None, str | None]] | None
         ) = None
@@ -197,13 +209,13 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
             self._cached_device_id = device.id
         return self._cached_device_id
 
-    def _tracked(self) -> list[str]:
-        """Return the configured tracking codes."""
-        return [
-            item[CONF_TRACKING_CODE]
+    def _tracked(self) -> dict[str, str]:
+        """Return the configured tracking codes mapped to their direction."""
+        return {
+            item[CONF_TRACKING_CODE]: tracked_direction(item)
             for item in self.config_entry.options.get(CONF_PARCELS, [])
             if item.get(CONF_TRACKING_CODE)
-        ]
+        }
 
     @property
     def _include_history(self) -> bool:
@@ -215,8 +227,9 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
         )
 
     async def _async_update_data(self) -> list[dict]:
-        """Fetch every tracked parcel and split into active vs delivered."""
-        codes = self._tracked()
+        """Fetch every tracked parcel, split by direction and by delivered."""
+        directions = self._tracked()
+        codes = list(directions)
 
         # Drop cache entries for parcels the user no longer follows, so the
         # cache stays bounded.
@@ -283,34 +296,55 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
             (code, normalize_parcel(raw, include_history=include_history))
             for code, raw in raws_by_code.items()
         ]
-        active = [parcel for _, parcel in entries if not parcel["delivered"]]
-        delivered = [parcel for _, parcel in entries if parcel["delivered"]]
         # Rebuilt fresh from this cycle's data — a code whose payload just
         # flipped to delivered is skipped starting next cycle; one that
         # somehow un-delivers (should not happen, but the fetch list must
         # never permanently drop a code) rejoins it automatically.
         self._delivered_codes = {code for code, parcel in entries if parcel["delivered"]}
 
+        outgoing_codes = {
+            code
+            for code in directions
+            if directions[code] == DIRECTION_OUTGOING
+        }
+        sent = [parcel for code, parcel in entries if code in outgoing_codes]
+        received = [parcel for code, parcel in entries if code not in outgoing_codes]
+
         self.delivered = apply_delivered_filter(
-            sort_parcels_by_ts(delivered, "delivered_at", descending=True),
+            sort_parcels_by_ts(
+                [p for p in received if p["delivered"]],
+                "delivered_at",
+                descending=True,
+            ),
             self.config_entry,
         )
-        normalized_active = sort_parcels_by_ts(active, "planned_from")
+        self.delivered_outgoing = apply_delivered_filter(
+            sort_parcels_by_ts(
+                [p for p in sent if p["delivered"]], "delivered_at", descending=True
+            ),
+            self.config_entry,
+        )
+        normalized_active = sort_parcels_by_ts(
+            [p for p in received if not p["delivered"]], "planned_from"
+        )
+        self.outgoing = sort_parcels_by_ts(
+            [p for p in sent if not p["delivered"]], "planned_from"
+        )
 
         # Incoming = active + delivered, combined so the transition to
         # delivered is visible in one set.
         incoming = normalized_active + self.delivered
         self._fire_change_events(incoming)
-        self._known_state = {
-            parcel["barcode"]: parcel["status"]
-            for parcel in incoming
-            if parcel.get("barcode")
-        }
+        self._known_state = self._status_map(incoming)
         self._known_delivery_times = {
             parcel["barcode"]: (parcel.get("planned_from"), parcel.get("planned_to"))
             for parcel in incoming
             if parcel.get("barcode")
         }
+
+        combined_outgoing = self.outgoing + self.delivered_outgoing
+        self._fire_outgoing_change_events(combined_outgoing)
+        self._known_outgoing_state = self._status_map(combined_outgoing)
 
         # Only stamp the diagnostic timestamp when at least one fetch actually
         # succeeded (or nothing needed fetching) — a poll served entirely from
@@ -319,11 +353,22 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
             self.last_success_time = datetime.now(timezone.utc)
 
         now = dt_util.now()
-        self._current_tier_minutes = _hottest_tier_minutes(normalized_active, now)
+        self._current_tier_minutes = _hottest_tier_minutes(
+            normalized_active + self.outgoing, now
+        )
         self.update_interval = _next_update_interval(
             now, self._current_tier_minutes, self.config_entry.entry_id
         )
         return normalized_active
+
+    @staticmethod
+    def _status_map(parcels: list[dict]) -> dict[str, ParcelStatus]:
+        """Barcode -> status, for comparing against the next refresh."""
+        return {
+            parcel["barcode"]: parcel["status"]
+            for parcel in parcels
+            if parcel.get("barcode")
+        }
 
     def _fire_change_events(self, parcels: list[dict]) -> None:
         """Fire registered / status-changed / delivered / delivery-time events.
@@ -392,5 +437,42 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
                         "new_planned_from": new_from,
                         "old_planned_to": old_to,
                         "new_planned_to": new_to,
+                    },
+                )
+
+    def _fire_outgoing_change_events(self, parcels: list[dict]) -> None:
+        """Fire outgoing status-changed / delivered events.
+
+        No ``registered`` and no delivery-time event for outgoing (deliberate,
+        same as the rest of the suite): a parcel the user handed over is not
+        news when it appears, and its ETA is the recipient's business. The hop
+        to ``delivered`` fires only ``_outgoing_parcel_delivered``.
+        """
+        if self._known_outgoing_state is None:
+            return
+
+        device_id = self._device_id()
+
+        for parcel in parcels:
+            barcode = parcel.get("barcode")
+            if not barcode or barcode not in self._known_outgoing_state:
+                continue
+            old_status = self._known_outgoing_state[barcode]
+            new_status = parcel["status"]
+            if new_status == old_status:
+                continue
+            if new_status == ParcelStatus.DELIVERED:
+                self.hass.bus.async_fire(
+                    f"{DOMAIN}_outgoing_parcel_delivered",
+                    {**parcel, "device_id": device_id},
+                )
+            else:
+                self.hass.bus.async_fire(
+                    f"{DOMAIN}_outgoing_parcel_status_changed",
+                    {
+                        **parcel,
+                        "device_id": device_id,
+                        "old_status": old_status,
+                        "new_status": new_status,
                     },
                 )

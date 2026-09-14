@@ -30,6 +30,16 @@ _LOGGER = logging.getLogger(__name__)
 PARALLEL_UPDATES = 0
 
 
+def _active_parcels(coordinator: PacketaCoordinator) -> list[dict]:
+    """Every active parcel across both directions (incoming + outgoing)."""
+    return list(coordinator.data or []) + list(coordinator.outgoing or [])
+
+
+def _active_barcodes(coordinator: PacketaCoordinator) -> set[str]:
+    """Barcodes of every active parcel (both directions)."""
+    return {p.get("barcode", "") for p in _active_parcels(coordinator)}
+
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -42,9 +52,7 @@ async def async_setup_entry(
     # than (too late) from this forwarded platform.
     coordinator = entry.runtime_data.coordinator
 
-    current_barcodes: set[str] = {
-        p.get("barcode", "") for p in coordinator.data or []
-    }
+    current_barcodes = _active_barcodes(coordinator)
     entry_id = entry.entry_id
 
     # Remove per-parcel sensors from the registry whose barcode is no longer
@@ -57,6 +65,8 @@ async def async_setup_entry(
         f"{entry_id}_awaiting_pickup",
         f"{entry_id}_next_delivery",
         f"{entry_id}_delivered_parcels",
+        f"{entry_id}_outgoing_parcels",
+        f"{entry_id}_outgoing_delivered_parcels",
         f"{entry_id}_last_update",
     }
     for entity_entry in er.async_entries_for_config_entry(registry, entry_id):
@@ -75,12 +85,14 @@ async def async_setup_entry(
         ),
         PacketaAwaitingPickupSensor(coordinator, entry),
     ]
-    for parcel in coordinator.data or []:
+    for parcel in _active_parcels(coordinator):
         entities.append(
             PacketaParcelSensor(coordinator, entry, parcel.get("barcode", ""))
         )
     entities.append(PacketaNextDeliverySensor(coordinator, entry))
     entities.append(PacketaDeliveredParcelsSensor(coordinator, entry))
+    entities.append(PacketaOutgoingParcelsSensor(coordinator, entry))
+    entities.append(PacketaOutgoingDeliveredParcelsSensor(coordinator, entry))
     entities.append(PacketaLastUpdateSensor(coordinator, entry))
 
     async_add_entities(entities)
@@ -89,11 +101,12 @@ async def async_setup_entry(
 class PacketaIncomingParcelsSensor(
     CoordinatorEntity[PacketaCoordinator], SensorEntity
 ):
-    """Summary sensor: count of active (not-yet-delivered) tracked parcels.
+    """Summary sensor: count of active (not-yet-delivered) incoming parcels.
 
-    Spawns a per-parcel sensor for each new barcode and removes stale ones
-    from the registry (via the registry, not self-removal, to avoid the ghost
-    entity race).
+    Spawns a per-parcel sensor for each new barcode — in **both** directions,
+    so a parcel the user sends gets one too — and removes stale ones from the
+    registry (via the registry, not self-removal, to avoid the ghost entity
+    race).
     """
 
     _attr_has_entity_name = True
@@ -128,9 +141,7 @@ class PacketaIncomingParcelsSensor(
         return {"parcels": self.coordinator.data or []}
 
     def _handle_coordinator_update(self) -> None:
-        current_barcodes: set[str] = {
-            p.get("barcode", "") for p in (self.coordinator.data or [])
-        }
+        current_barcodes = _active_barcodes(self.coordinator)
 
         new_barcodes = current_barcodes - self._known_barcodes
         if new_barcodes:
@@ -306,6 +317,66 @@ class PacketaDeliveredParcelsSensor(
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the extra state attributes."""
         return {"parcels": self.coordinator.delivered}
+
+
+class PacketaOutgoingParcelsSensor(
+    CoordinatorEntity[PacketaCoordinator], SensorEntity
+):
+    """Active (not-yet-delivered) parcels the user is sending."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "outgoing_parcels"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_attribution = ATTRIBUTION
+    _unrecorded_attributes = frozenset({"parcels"})
+
+    def __init__(
+        self, coordinator: PacketaCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_outgoing_parcels"
+        self._attr_device_info = build_device_info(entry)
+
+    @property
+    def native_value(self) -> int:
+        """Return the native value of the sensor."""
+        return len(self.coordinator.outgoing or [])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes."""
+        return {"parcels": self.coordinator.outgoing or []}
+
+
+class PacketaOutgoingDeliveredParcelsSensor(
+    CoordinatorEntity[PacketaCoordinator], SensorEntity
+):
+    """Recently delivered parcels the user sent."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "outgoing_delivered_parcels"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_attribution = ATTRIBUTION
+    _unrecorded_attributes = frozenset({"parcels"})
+
+    def __init__(
+        self, coordinator: PacketaCoordinator, entry: ConfigEntry
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_outgoing_delivered_parcels"
+        self._attr_device_info = build_device_info(entry)
+
+    @property
+    def native_value(self) -> int:
+        """Return the native value of the sensor."""
+        return len(self.coordinator.delivered_outgoing or [])
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the extra state attributes."""
+        return {"parcels": self.coordinator.delivered_outgoing or []}
 
 
 class PacketaLastUpdateSensor(

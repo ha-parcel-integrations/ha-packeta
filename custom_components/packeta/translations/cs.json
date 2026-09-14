@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Možnosti Packety",
-        "sections": {
-          "parcels": {
-            "name": "Zásilky",
-            "data": {
-              "add": "Přidat zásilku",
-              "remove": "Odebrat zásilky"
-            },
-            "data_description": {
-              "add": "Zadejte sledovací kód Packety a začněte ji sledovat. Najdete ho na potvrzení o odeslání nebo na kartě o zmeškaném doručení."
-            }
-          },
-          "delivered": {
-            "name": "Doručené zásilky",
-            "data": {
-              "delivered_filter_type": "Filtrovat podle",
-              "delivered_filter_amount": "Počet"
-            },
-            "data_description": {
-              "delivered_filter_type": "Zobrazit doručené zásilky za posledních X dní, nebo omezit na X nejnovějších.",
-              "delivered_filter_amount": "Počet dní nebo zásilek k zobrazení."
-            }
-          },
-          "history": {
-            "name": "Historie zásilky",
-            "data": {
-              "include_history": "Zahrnout historii stavů"
-            },
-            "data_description": {
-              "include_history": "Přidá k zásilce atribut historie s každou změnou stavu (čas, stav, původní text). Ve výchozím nastavení vypnuto."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Zásilky",
+          "incoming_parcels": "Příchozí zásilky",
+          "outgoing_parcels": "Odchozí zásilky",
           "settings": "Nastavení"
         }
       },
-      "parcels": {
-        "title": "Zásilky",
+      "incoming_parcels": {
+        "title": "Správa příchozích zásilek",
+        "description": "Sledovací kódy zásilek, které očekáváte. Sledovací data Packety nerozliší zásilku, kterou posíláte, od zásilky, kterou přijímáte – každý kód proto zadejte do správného seznamu.",
+        "data": {
+          "tracking_codes": "Sledovací kódy"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Správa odchozích zásilek",
+        "description": "Sledovací kódy zásilek, které jste odeslali. Počítají se zvlášť, takže se nezapočítávají mezi příchozí zásilky.",
         "data": {
           "tracking_codes": "Sledovací kódy"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "To nevypadá jako sledovací kód Packety.",
-      "already_tracked": "Tato zásilka už je sledována."
+      "invalid_tracking_code": "To nevypadá jako sledovací kód Packety."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Dny",
         "parcels": "Počet zásilek"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Příchozí",
+        "outgoing": "Odchozí"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Sledovací kód",
           "description": "Sledovací kód Packety."
+        },
+        "direction": {
+          "name": "Směr",
+          "description": "Zda zásilku přijímáte, nebo odesíláte. Sledovací data Packety to nerozliší. Opětovné zavolání s opačným směrem už sledovanou zásilku přesune."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Zásilka byla zaregistrována",
       "parcel_status_changed": "Stav zásilky se změnil",
       "parcel_delivered": "Zásilka byla doručena",
-      "parcel_delivery_time_changed": "Očekávaný čas doručení zásilky se změnil"
+      "parcel_delivery_time_changed": "Očekávaný čas doručení zásilky se změnil",
+      "outgoing_parcel_status_changed": "Stav odchozí zásilky se změnil",
+      "outgoing_parcel_delivered": "Odchozí zásilka byla doručena"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Doručené zásilky",
+        "unit_of_measurement": "zásilky"
+      },
+      "outgoing_parcels": {
+        "name": "Odchozí zásilky",
+        "unit_of_measurement": "zásilky"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Odchozí doručené zásilky",
         "unit_of_measurement": "zásilky"
       },
       "last_update": {

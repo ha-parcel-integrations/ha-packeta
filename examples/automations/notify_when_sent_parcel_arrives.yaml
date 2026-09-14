@@ -1,0 +1,25 @@
+# Notify when a parcel you sent reaches its recipient.
+#
+# Packeta cannot tell an outgoing parcel from an incoming one on its own, so
+# this fires only for codes you filed under "Outgoing parcels" in the
+# integration options (or tracked with ``direction: outgoing``).
+
+alias: "Packeta: a parcel I sent was delivered"
+description: Notify when an outgoing Packeta parcel reaches its recipient.
+mode: queued
+max: 10
+
+triggers:
+  - trigger: event
+    event_type: packeta_outgoing_parcel_delivered
+
+actions:
+  - action: notify.mobile_app
+    data:
+      title: "Your parcel arrived"
+      message: >-
+        The parcel you sent ({{ trigger.event.data.barcode }}) has been
+        delivered{% if trigger.event.data.pickup_point %} at
+        {{ trigger.event.data.pickup_point }}{% endif %}.
+      data:
+        clickAction: "{{ trigger.event.data.url }}"

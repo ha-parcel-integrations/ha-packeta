@@ -5,6 +5,13 @@ track_parcel:
       example: "Z9998887776"
       selector:
         text:
+    direction:
+      default: incoming
+      selector:
+        select:
+          options:
+            - "incoming"
+            - "outgoing"
 
 untrack_parcel:
   fields:

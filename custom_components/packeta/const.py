@@ -67,11 +67,23 @@ TRACKING_LOCALE = "en"
 TRACKING_URL = "https://tracking.packeta.com/en/?id={tracking_code}"
 
 # Tracked parcels live in the config entry options as a list of
-# ``{tracking_code}`` dicts — this carrier has no account or parcel feed, so the
-# user enters the codes themselves. Kept as dicts so future per-parcel fields
-# slot in without an options migration.
+# ``{tracking_code, direction}`` dicts — this carrier has no account or parcel
+# feed, so the user enters the codes themselves. Kept as dicts so future
+# per-parcel fields slot in without an options migration.
 CONF_PARCELS = "parcels"
 CONF_TRACKING_CODE = "tracking_code"
+
+# Which way a parcel is going. Packeta is account-less and its payload cannot
+# tell the two apart — a C2C parcel the user sends and one they receive are
+# byte-for-byte alike (same ``sender: "C2C"``, same ``courierId``), and there
+# is no account identity to compare a party against. So direction is
+# **declared by the user**, per parcel, and never inferred from the payload.
+# Absent on entries written before this option existed, hence the default
+# everywhere it is read — no options migration needed.
+CONF_DIRECTION = "direction"
+DIRECTION_INCOMING = "incoming"
+DIRECTION_OUTGOING = "outgoing"
+DEFAULT_DIRECTION = DIRECTION_INCOMING
 
 # Delivered-parcels retention: keep delivered parcels visible for the last N
 # days, or keep only the N most recent — identical across the suite.

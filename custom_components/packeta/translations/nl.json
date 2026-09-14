@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Packeta-opties",
-        "sections": {
-          "parcels": {
-            "name": "Pakketten",
-            "data": {
-              "add": "Pakket toevoegen",
-              "remove": "Pakketten verwijderen"
-            },
-            "data_description": {
-              "add": "Voer een Packeta-trackingcode in om het pakket te volgen. Je vindt de code op de verzendbevestiging of het niet-thuiskaartje."
-            }
-          },
-          "delivered": {
-            "name": "Bezorgde pakketten",
-            "data": {
-              "delivered_filter_type": "Filteren op",
-              "delivered_filter_amount": "Aantal"
-            },
-            "data_description": {
-              "delivered_filter_type": "Toon bezorgde pakketten van de laatste X dagen, of beperk tot de X meest recente.",
-              "delivered_filter_amount": "Aantal dagen of pakketten om te tonen."
-            }
-          },
-          "history": {
-            "name": "Pakketgeschiedenis",
-            "data": {
-              "include_history": "Statusgeschiedenis toevoegen"
-            },
-            "data_description": {
-              "include_history": "Voegt per pakket een history-attribuut toe met elke statusupdate (tijdstip, status, originele tekst). Standaard uit."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Pakketten",
+          "incoming_parcels": "Inkomende pakketten",
+          "outgoing_parcels": "Uitgaande pakketten",
           "settings": "Instellingen"
         }
       },
-      "parcels": {
-        "title": "Pakketten beheren",
+      "incoming_parcels": {
+        "title": "Inkomende pakketten beheren",
+        "description": "Trackingcodes van pakketten die je verwacht. De trackinggegevens van Packeta kunnen een pakket dat je verstuurt niet onderscheiden van een pakket dat je ontvangt, dus zet elke code in de juiste lijst.",
+        "data": {
+          "tracking_codes": "Trackingcodes"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Uitgaande pakketten beheren",
+        "description": "Trackingcodes van pakketten die je hebt verstuurd. Ze worden apart geteld en tellen dus niet mee met je inkomende pakketten.",
         "data": {
           "tracking_codes": "Trackingcodes"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "Dit lijkt geen Packeta-trackingcode.",
-      "already_tracked": "Dit pakket wordt al gevolgd."
+      "invalid_tracking_code": "Dit lijkt geen Packeta-trackingcode."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Dagen",
         "parcels": "Aantal pakketten"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Inkomend",
+        "outgoing": "Uitgaand"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Trackingcode",
           "description": "De Packeta-trackingcode."
+        },
+        "direction": {
+          "name": "Richting",
+          "description": "Of je dit pakket ontvangt of verstuurt. De trackinggegevens van Packeta kunnen dat niet onderscheiden. Roep je de service opnieuw aan met de andere richting, dan verplaatst een al gevolgd pakket."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Een pakket is geregistreerd",
       "parcel_status_changed": "De status van een pakket is gewijzigd",
       "parcel_delivered": "Een pakket is bezorgd",
-      "parcel_delivery_time_changed": "De verwachte bezorgtijd van een pakket is gewijzigd"
+      "parcel_delivery_time_changed": "De verwachte bezorgtijd van een pakket is gewijzigd",
+      "outgoing_parcel_status_changed": "De status van een uitgaand pakket is gewijzigd",
+      "outgoing_parcel_delivered": "Een uitgaand pakket is bezorgd"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Bezorgde pakketten",
+        "unit_of_measurement": "pakketten"
+      },
+      "outgoing_parcels": {
+        "name": "Uitgaande pakketten",
+        "unit_of_measurement": "pakketten"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Uitgaande bezorgde pakketten",
         "unit_of_measurement": "pakketten"
       },
       "last_update": {

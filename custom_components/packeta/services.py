@@ -3,6 +3,10 @@
 `packeta.track_parcel` / `packeta.untrack_parcel` let you add or remove a
 tracked parcel without opening the integration options — so a Lovelace button
 can start tracking a parcel straight from a dashboard.
+
+`track_parcel` takes the same incoming/outgoing choice as the options flow,
+defaulting to incoming; Packeta's payload cannot reveal it (see
+`CONF_DIRECTION` in `const.py`).
 """
 from __future__ import annotations
 
@@ -12,12 +16,28 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 
 from .config_flow import normalize_tracking_code, valid_tracking_code
-from .const import CONF_PARCELS, CONF_TRACKING_CODE, DOMAIN
+from .const import (
+    CONF_DIRECTION,
+    CONF_PARCELS,
+    CONF_TRACKING_CODE,
+    DEFAULT_DIRECTION,
+    DIRECTION_INCOMING,
+    DIRECTION_OUTGOING,
+    DOMAIN,
+)
+from .parcels import tracked_direction
 
 SERVICE_TRACK_PARCEL = "track_parcel"
 SERVICE_UNTRACK_PARCEL = "untrack_parcel"
 
-_TRACK_SCHEMA = vol.Schema({vol.Required(CONF_TRACKING_CODE): cv.string})
+_TRACK_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_TRACKING_CODE): cv.string,
+        vol.Optional(CONF_DIRECTION, default=DEFAULT_DIRECTION): vol.In(
+            [DIRECTION_INCOMING, DIRECTION_OUTGOING]
+        ),
+    }
+)
 _UNTRACK_SCHEMA = vol.Schema({vol.Required(CONF_TRACKING_CODE): cv.string})
 
 
@@ -42,10 +62,22 @@ def async_setup_services(hass: HomeAssistant) -> None:
             )
         entry = _resolve_entry(hass)
 
+        direction = call.data[CONF_DIRECTION]
         parcels = [dict(p) for p in entry.options.get(CONF_PARCELS, [])]
-        if any(p[CONF_TRACKING_CODE] == tracking_code for p in parcels):
-            return  # already tracked — no-op
-        parcels.append({CONF_TRACKING_CODE: tracking_code})
+        existing = next(
+            (p for p in parcels if p[CONF_TRACKING_CODE] == tracking_code), None
+        )
+        if existing is not None:
+            # Already tracked. Calling again with the other direction is how a
+            # parcel filed the wrong way gets corrected without untracking it
+            # first; calling again with the same one stays a no-op.
+            if tracked_direction(existing) == direction:
+                return
+            existing[CONF_DIRECTION] = direction
+        else:
+            parcels.append(
+                {CONF_TRACKING_CODE: tracking_code, CONF_DIRECTION: direction}
+            )
         hass.config_entries.async_update_entry(
             entry, options={**entry.options, CONF_PARCELS: parcels}
         )

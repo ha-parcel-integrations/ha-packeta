@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Možnosti Packety",
-        "sections": {
-          "parcels": {
-            "name": "Zásielky",
-            "data": {
-              "add": "Pridať zásielku",
-              "remove": "Odstrániť zásielky"
-            },
-            "data_description": {
-              "add": "Zadajte sledovací kód Packety a začnite ju sledovať. Nájdete ho na potvrdení o odoslaní alebo na karte o zmeškanom doručení."
-            }
-          },
-          "delivered": {
-            "name": "Doručené zásielky",
-            "data": {
-              "delivered_filter_type": "Filtrovať podľa",
-              "delivered_filter_amount": "Počet"
-            },
-            "data_description": {
-              "delivered_filter_type": "Zobraziť doručené zásielky za posledných X dní, alebo obmedziť na X najnovších.",
-              "delivered_filter_amount": "Počet dní alebo zásielok na zobrazenie."
-            }
-          },
-          "history": {
-            "name": "História zásielky",
-            "data": {
-              "include_history": "Zahrnúť históriu stavov"
-            },
-            "data_description": {
-              "include_history": "Pridá k zásielke atribút histórie s každou zmenou stavu (čas, stav, pôvodný text). V predvolenom nastavení vypnuté."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Zásielky",
+          "incoming_parcels": "Prichádzajúce zásielky",
+          "outgoing_parcels": "Odchádzajúce zásielky",
           "settings": "Nastavenia"
         }
       },
-      "parcels": {
-        "title": "Zásielky",
+      "incoming_parcels": {
+        "title": "Správa prichádzajúcich zásielok",
+        "description": "Sledovacie kódy zásielok, ktoré očakávate. Sledovacie údaje Packety nerozlíšia zásielku, ktorú posielate, od zásielky, ktorú prijímate – každý kód preto zadajte do správneho zoznamu.",
+        "data": {
+          "tracking_codes": "Sledovacie kódy"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Správa odchádzajúcich zásielok",
+        "description": "Sledovacie kódy zásielok, ktoré ste odoslali. Počítajú sa osobitne, takže sa nezapočítavajú medzi prichádzajúce zásielky.",
         "data": {
           "tracking_codes": "Sledovacie kódy"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "Toto nevyzerá ako sledovací kód Packety.",
-      "already_tracked": "Táto zásielka sa už sleduje."
+      "invalid_tracking_code": "Toto nevyzerá ako sledovací kód Packety."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Dni",
         "parcels": "Počet zásielok"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Prichádzajúca",
+        "outgoing": "Odchádzajúca"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Sledovací kód",
           "description": "Sledovací kód Packety."
+        },
+        "direction": {
+          "name": "Smer",
+          "description": "Či zásielku prijímate, alebo odosielate. Sledovacie údaje Packety to nerozlíšia. Opätovné zavolanie s opačným smerom už sledovanú zásielku presunie."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Zásielka bola zaregistrovaná",
       "parcel_status_changed": "Stav zásielky sa zmenil",
       "parcel_delivered": "Zásielka bola doručená",
-      "parcel_delivery_time_changed": "Očakávaný čas doručenia zásielky sa zmenil"
+      "parcel_delivery_time_changed": "Očakávaný čas doručenia zásielky sa zmenil",
+      "outgoing_parcel_status_changed": "Stav odchádzajúcej zásielky sa zmenil",
+      "outgoing_parcel_delivered": "Odchádzajúca zásielka bola doručená"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Doručené zásielky",
+        "unit_of_measurement": "zásielky"
+      },
+      "outgoing_parcels": {
+        "name": "Odchádzajúce zásielky",
+        "unit_of_measurement": "zásielky"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Odchádzajúce doručené zásielky",
         "unit_of_measurement": "zásielky"
       },
       "last_update": {

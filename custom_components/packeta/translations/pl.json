@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Opcje Packety",
-        "sections": {
-          "parcels": {
-            "name": "Paczki",
-            "data": {
-              "add": "Dodaj paczkę",
-              "remove": "Usuń paczki"
-            },
-            "data_description": {
-              "add": "Wpisz kod śledzenia Packety, aby rozpocząć śledzenie. Znajdziesz go na potwierdzeniu wysyłki lub na awizo o nieudanej dostawie."
-            }
-          },
-          "delivered": {
-            "name": "Dostarczone paczki",
-            "data": {
-              "delivered_filter_type": "Filtruj według",
-              "delivered_filter_amount": "Liczba"
-            },
-            "data_description": {
-              "delivered_filter_type": "Pokaż dostarczone paczki z ostatnich X dni lub ogranicz do X najnowszych.",
-              "delivered_filter_amount": "Liczba dni lub paczek do wyświetlenia."
-            }
-          },
-          "history": {
-            "name": "Historia paczki",
-            "data": {
-              "include_history": "Uwzględnij historię statusów"
-            },
-            "data_description": {
-              "include_history": "Dodaje do paczki atrybut historii z każdą zmianą statusu (znacznik czasu, status, oryginalny tekst). Domyślnie wyłączone."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Przesyłki",
+          "incoming_parcels": "Paczki przychodzące",
+          "outgoing_parcels": "Paczki wychodzące",
           "settings": "Ustawienia"
         }
       },
-      "parcels": {
-        "title": "Przesyłki",
+      "incoming_parcels": {
+        "title": "Zarządzaj paczkami przychodzącymi",
+        "description": "Numery przesyłek, których oczekujesz. Dane śledzenia Packety nie odróżniają paczki wysyłanej od odbieranej – wpisz każdy numer na właściwą listę.",
+        "data": {
+          "tracking_codes": "Numery przesyłek"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Zarządzaj paczkami wychodzącymi",
+        "description": "Numery przesyłek, które wysłałeś. Są liczone osobno, więc nie powiększają liczby paczek przychodzących.",
         "data": {
           "tracking_codes": "Numery przesyłek"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "To nie wygląda na kod śledzenia Packety.",
-      "already_tracked": "Ta paczka jest już śledzona."
+      "invalid_tracking_code": "To nie wygląda na kod śledzenia Packety."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Dni",
         "parcels": "Liczba paczek"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Przychodząca",
+        "outgoing": "Wychodząca"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Kod śledzenia",
           "description": "Kod śledzenia Packety."
+        },
+        "direction": {
+          "name": "Kierunek",
+          "description": "Czy odbierasz tę paczkę, czy ją wysyłasz. Dane śledzenia Packety nie rozróżniają tych dwóch przypadków. Ponowne wywołanie z drugim kierunkiem przenosi już śledzoną paczkę."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Paczka została zarejestrowana",
       "parcel_status_changed": "Status paczki się zmienił",
       "parcel_delivered": "Paczka została dostarczona",
-      "parcel_delivery_time_changed": "Przewidywany czas dostawy paczki się zmienił"
+      "parcel_delivery_time_changed": "Przewidywany czas dostawy paczki się zmienił",
+      "outgoing_parcel_status_changed": "Status paczki wychodzącej się zmienił",
+      "outgoing_parcel_delivered": "Paczka wychodząca została dostarczona"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Dostarczone paczki",
+        "unit_of_measurement": "paczki"
+      },
+      "outgoing_parcels": {
+        "name": "Paczki wychodzące",
+        "unit_of_measurement": "paczki"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Dostarczone paczki wychodzące",
         "unit_of_measurement": "paczki"
       },
       "last_update": {

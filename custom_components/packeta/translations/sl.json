@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Možnosti Packete",
-        "sections": {
-          "parcels": {
-            "name": "Paketi",
-            "data": {
-              "add": "Dodaj paket",
-              "remove": "Odstrani pakete"
-            },
-            "data_description": {
-              "add": "Vnesite sledilno kodo Packete, da začnete slediti paketu. Najdete jo na potrdilu o pošiljanju ali kartici o zgrešeni dostavi."
-            }
-          },
-          "delivered": {
-            "name": "Dostavljeni paketi",
-            "data": {
-              "delivered_filter_type": "Filtriraj po",
-              "delivered_filter_amount": "Količina"
-            },
-            "data_description": {
-              "delivered_filter_type": "Prikaži dostavljene pakete iz zadnjih X dni ali omeji na X najnovejših.",
-              "delivered_filter_amount": "Število dni ali paketov za prikaz."
-            }
-          },
-          "history": {
-            "name": "Zgodovina paketov",
-            "data": {
-              "include_history": "Vključi zgodovino stanj"
-            },
-            "data_description": {
-              "include_history": "Vsakemu paketu doda atribut zgodovine s seznamom vsake posodobitve stanja (časovni žig, stanje, izvirno besedilo). Privzeto izklopljeno."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Paketi",
+          "incoming_parcels": "Prihajajoči paketi",
+          "outgoing_parcels": "Odhodni paketi",
           "settings": "Nastavitve"
         }
       },
-      "parcels": {
-        "title": "Paketi",
+      "incoming_parcels": {
+        "title": "Upravljanje prihajajočih paketov",
+        "description": "Sledilne kode paketov, ki jih pričakuješ. Sledilni podatki Packete ne razlikujejo paketa, ki ga pošiljaš, od tistega, ki ga prejemaš – vsako kodo vnesi na ustrezen seznam.",
+        "data": {
+          "tracking_codes": "Kode za sledenje"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Upravljanje odhodnih paketov",
+        "description": "Sledilne kode paketov, ki si jih poslal. Štejejo se ločeno, zato ne povečajo števila prihajajočih paketov.",
         "data": {
           "tracking_codes": "Kode za sledenje"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "To ni videti kot sledilna koda Packete.",
-      "already_tracked": "Temu paketu že sledimo."
+      "invalid_tracking_code": "To ni videti kot sledilna koda Packete."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Dnevi",
         "parcels": "Število paketov"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Prihajajoči",
+        "outgoing": "Odhodni"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Sledilna koda",
           "description": "Sledilna koda Packete."
+        },
+        "direction": {
+          "name": "Smer",
+          "description": "Ali ta paket prejemaš ali ga pošiljaš. Sledilni podatki Packete tega ne razlikujejo. Ponoven klic z nasprotno smerjo premakne že sledeni paket."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Paket je bil registriran",
       "parcel_status_changed": "Stanje paketa se je spremenilo",
       "parcel_delivered": "Paket je bil dostavljen",
-      "parcel_delivery_time_changed": "Pričakovani čas dostave paketa se je spremenil"
+      "parcel_delivery_time_changed": "Pričakovani čas dostave paketa se je spremenil",
+      "outgoing_parcel_status_changed": "Stanje odhodnega paketa se je spremenilo",
+      "outgoing_parcel_delivered": "Odhodni paket je bil dostavljen"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Dostavljeni paketi",
+        "unit_of_measurement": "paketov"
+      },
+      "outgoing_parcels": {
+        "name": "Odhodni paketi",
+        "unit_of_measurement": "paketov"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Odhodni dostavljeni paketi",
         "unit_of_measurement": "paketov"
       },
       "last_update": {

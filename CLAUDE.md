@@ -41,7 +41,10 @@ Where this repo diverges from it, that is recorded below under
   `non_parcel_unique_ids`** — else it deletes the refresh button / the
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
-  `entity_registry.async_remove` (self-removal races and leaves ghosts).
+  `entity_registry.async_remove` (self-removal races and leaves ghosts). The
+  barcode set it compares against spans **both** directions (`_active_parcels`
+  in `sensor.py`) — scope it to `coordinator.data` and every outgoing parcel's
+  sensor is swept away on the next refresh.
 
 ## Carrier-specific decisions (integration only)
 
@@ -75,6 +78,29 @@ map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
   Reflected in `const.py`'s `CAPABILITIES` (feeds the docs site's comparison
   table) — keep
   the two in agreement if that ever changes.
+
+- **Direction is declared by the user, never inferred.** Packeta is
+  account-less *and* its payload cannot separate the two directions: a C2C
+  parcel the user sends and one they receive are identical (`sender: "C2C"`,
+  `courierId: "0"`), and there is no account identity to compare a party
+  against. So each tracked code is filed under an `incoming` or `outgoing`
+  options list (`CONF_DIRECTION` on the `CONF_PARCELS` dicts, defaulting to
+  incoming so pre-existing entries need no migration), and the coordinator
+  splits on that, not on the payload. **Do not build direction inference on
+  the handover event text** — the "We have successfully received the parcel
+  for transport. <Z-BOX>" sentence does name the drop-off box on an outgoing
+  parcel, but it is free text with no structured field behind it, it says
+  nothing before handover, and `_EVENT_TEXT_MAP` matching it would make the
+  split silently locale- and wording-dependent. Re-submitting a code in the
+  other list (or calling `track_parcel` again with the other direction) moves
+  it rather than erroring — that is the correction path, so the flow has no
+  duplicate error. The rest is the suite's normal outgoing shape: two summary
+  sensors, the `_outgoing_parcel_status_changed` / `_outgoing_parcel_delivered`
+  pair with no `registered` and no delivery-time event, per-parcel sensors for
+  both directions, and `awaiting_pickup` / `next_delivery` / the calendar
+  deliberately incoming-only. This makes Packeta the suite's reference for a
+  **user-declared** direction; every other outgoing carrier (DPD, DHL NL,
+  PPL CZ, …) derives it from an account feed.
 
 ## Divergences from the scaffold
 

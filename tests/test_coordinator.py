@@ -14,8 +14,11 @@ from custom_components.packeta.api import PacketaApiError
 from custom_components.packeta.const import (
     CONF_DELIVERED_FILTER_AMOUNT,
     CONF_DELIVERED_FILTER_TYPE,
+    CONF_DIRECTION,
     CONF_PARCELS,
     CONF_TRACKING_CODE,
+    DIRECTION_INCOMING,
+    DIRECTION_OUTGOING,
     DOMAIN,
     HOT_INTERVAL_MINUTES,
     MID_INTERVAL_MINUTES,
@@ -677,6 +680,166 @@ async def test_losing_the_eta_is_silent(hass):
             }
         ]
     )
+    await hass.async_block_till_done()
+
+    assert events == []
+
+
+# ---------------------------------------------------------------------------
+# Direction — declared by the user, never inferred from the payload
+# ---------------------------------------------------------------------------
+
+
+def _outgoing(code: str) -> dict:
+    return {CONF_TRACKING_CODE: code, CONF_DIRECTION: DIRECTION_OUTGOING}
+
+
+async def test_outgoing_codes_land_in_their_own_lists(hass):
+    """Two identical payloads split purely on the list the code was filed in."""
+    entry = _entry_with(
+        [
+            {CONF_TRACKING_CODE: ACTIVE_CODE, CONF_DIRECTION: DIRECTION_INCOMING},
+            _outgoing(OTHER_CODE),
+            _outgoing(DELIVERED_CODE),
+        ]
+    )
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.side_effect = lambda code: (
+        delivered_sample(code) if code == DELIVERED_CODE else active_sample(code)
+    )
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    active = await coordinator._async_update_data()
+
+    assert [p["barcode"] for p in active] == [ACTIVE_CODE]
+    assert [p["barcode"] for p in coordinator.outgoing] == [OTHER_CODE]
+    assert [p["barcode"] for p in coordinator.delivered_outgoing] == [DELIVERED_CODE]
+    assert coordinator.delivered == []
+
+
+async def test_a_code_without_a_direction_reads_as_incoming(hass):
+    """Entries stored before the option existed must not vanish from incoming."""
+    entry = _entry_with([{CONF_TRACKING_CODE: ACTIVE_CODE}])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.return_value = active_sample()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    active = await coordinator._async_update_data()
+
+    assert [p["barcode"] for p in active] == [ACTIVE_CODE]
+    assert coordinator.outgoing == []
+
+
+async def test_outgoing_parcel_keeps_polling_alive(hass):
+    """A parcel the user sent is still in flight — it must hold a tier."""
+    entry = _entry_with([_outgoing(ACTIVE_CODE)])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.return_value = active_sample()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    active = await coordinator._async_update_data()
+
+    assert active == []
+    assert [p["barcode"] for p in coordinator.outgoing] == [ACTIVE_CODE]
+    assert coordinator.current_tier_minutes == MID_INTERVAL_MINUTES
+
+
+async def test_fires_outgoing_status_changed_event(hass):
+    entry = _entry_with([_outgoing(ACTIVE_CODE)])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    events = []
+    incoming_events = []
+    hass.bus.async_listen(
+        f"{DOMAIN}_outgoing_parcel_status_changed", lambda e: events.append(e)
+    )
+    hass.bus.async_listen(
+        f"{DOMAIN}_parcel_status_changed", lambda e: incoming_events.append(e)
+    )
+
+    client.async_get_parcel.return_value = _registered()
+    await coordinator._async_update_data()  # first refresh: suppressed
+    client.async_get_parcel.return_value = active_sample()
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert len(events) == 1
+    assert events[0].data["old_status"] == ParcelStatus.REGISTERED
+    assert events[0].data["new_status"] == ParcelStatus.IN_TRANSIT
+    # the incoming pair must stay silent for a parcel the user sent
+    assert incoming_events == []
+
+
+async def test_outgoing_delivery_fires_only_the_delivered_event(hass):
+    entry = _entry_with([_outgoing(ACTIVE_CODE)])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    delivered = []
+    changed = []
+    hass.bus.async_listen(
+        f"{DOMAIN}_outgoing_parcel_delivered", lambda e: delivered.append(e)
+    )
+    hass.bus.async_listen(
+        f"{DOMAIN}_outgoing_parcel_status_changed", lambda e: changed.append(e)
+    )
+
+    client.async_get_parcel.return_value = active_sample(ACTIVE_CODE)
+    await coordinator._async_update_data()
+    client.async_get_parcel.return_value = delivered_sample(ACTIVE_CODE)
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert changed == []
+    assert len(delivered) == 1
+    assert delivered[0].data["barcode"] == ACTIVE_CODE
+
+
+async def test_no_registered_event_for_a_new_outgoing_parcel(hass):
+    """Handing a parcel over is not news; only the incoming side announces one."""
+    entry = _entry_with([_outgoing(ACTIVE_CODE)])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    events = []
+    for suffix in ("parcel_registered", "outgoing_parcel_registered"):
+        hass.bus.async_listen(f"{DOMAIN}_{suffix}", lambda e: events.append(e))
+
+    client.async_get_parcel.side_effect = lambda code: _registered(code)
+    await coordinator._async_update_data()
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **entry.options,
+            CONF_PARCELS: [_outgoing(ACTIVE_CODE), _outgoing(OTHER_CODE)],
+        },
+    )
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert events == []
+
+
+async def test_an_unchanged_outgoing_status_is_silent(hass):
+    entry = _entry_with([_outgoing(ACTIVE_CODE)])
+    entry.add_to_hass(hass)
+    client = AsyncMock()
+    client.async_get_parcel.return_value = active_sample()
+    coordinator = PacketaCoordinator(hass, client, entry)
+
+    events = []
+    for suffix in ("outgoing_parcel_status_changed", "outgoing_parcel_delivered"):
+        hass.bus.async_listen(f"{DOMAIN}_{suffix}", lambda e: events.append(e))
+
+    await coordinator._async_update_data()
+    await coordinator._async_update_data()
     await hass.async_block_till_done()
 
     assert events == []

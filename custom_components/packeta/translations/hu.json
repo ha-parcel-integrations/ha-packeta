@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Packeta beállítások",
-        "sections": {
-          "parcels": {
-            "name": "Csomagok",
-            "data": {
-              "add": "Csomag hozzáadása",
-              "remove": "Csomagok eltávolítása"
-            },
-            "data_description": {
-              "add": "Add meg a Packeta követési kódot a követés elindításához. Megtalálod a szállítási visszaigazoláson vagy a sikertelen kézbesítésről szóló értesítőn."
-            }
-          },
-          "delivered": {
-            "name": "Kézbesített csomagok",
-            "data": {
-              "delivered_filter_type": "Szűrés",
-              "delivered_filter_amount": "Mennyiség"
-            },
-            "data_description": {
-              "delivered_filter_type": "Az elmúlt X nap kézbesített csomagjainak megjelenítése, vagy korlátozás a legutóbbi X darabra.",
-              "delivered_filter_amount": "A megjelenítendő napok vagy csomagok száma."
-            }
-          },
-          "history": {
-            "name": "Csomagelőzmények",
-            "data": {
-              "include_history": "Állapotelőzmények megjelenítése"
-            },
-            "data_description": {
-              "include_history": "Hozzáad egy csomagonkénti előzményattribútumot, amely felsorolja az egyes állapotfrissítéseket (időbélyeg, állapot, eredeti szöveg). Alapértelmezés szerint kikapcsolva."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Csomagok",
+          "incoming_parcels": "Érkező csomagok",
+          "outgoing_parcels": "Feladott csomagok",
           "settings": "Beállítások"
         }
       },
-      "parcels": {
-        "title": "Csomagok",
+      "incoming_parcels": {
+        "title": "Érkező csomagok kezelése",
+        "description": "Az általad várt csomagok követési kódjai. A Packeta követési adatai nem tudják megkülönböztetni az általad feladott csomagot a beérkezőtől, ezért minden kódot a megfelelő listába vegyél fel.",
+        "data": {
+          "tracking_codes": "Követési kódok"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Feladott csomagok kezelése",
+        "description": "Az általad feladott csomagok követési kódjai. Ezeket külön számoljuk, így nem növelik az érkező csomagok számát.",
         "data": {
           "tracking_codes": "Követési kódok"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "Ez nem hasonlít Packeta követési kódra.",
-      "already_tracked": "Ez a csomag már követve van."
+      "invalid_tracking_code": "Ez nem hasonlít Packeta követési kódra."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Napok",
         "parcels": "Csomagok száma"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Érkező",
+        "outgoing": "Feladott"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Követési kód",
           "description": "A Packeta követési kódja."
+        },
+        "direction": {
+          "name": "Irány",
+          "description": "Hogy ezt a csomagot kapod vagy te adtad fel. A Packeta követési adatai ezt nem tudják megkülönböztetni. A szolgáltatás ismételt hívása a másik iránnyal áthelyezi a már követett csomagot."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Egy csomag regisztrálva lett",
       "parcel_status_changed": "Egy csomag állapota megváltozott",
       "parcel_delivered": "Egy csomag kézbesítve lett",
-      "parcel_delivery_time_changed": "Egy csomag várható kézbesítési ideje megváltozott"
+      "parcel_delivery_time_changed": "Egy csomag várható kézbesítési ideje megváltozott",
+      "outgoing_parcel_status_changed": "Egy feladott csomag állapota megváltozott",
+      "outgoing_parcel_delivered": "Egy feladott csomag kézbesítve lett"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Kézbesített csomagok",
+        "unit_of_measurement": "csomag"
+      },
+      "outgoing_parcels": {
+        "name": "Feladott csomagok",
+        "unit_of_measurement": "csomag"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Feladott kézbesített csomagok",
         "unit_of_measurement": "csomag"
       },
       "last_update": {

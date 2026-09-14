@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Packeta options",
-        "sections": {
-          "parcels": {
-            "name": "Parcels",
-            "data": {
-              "add": "Add a parcel",
-              "remove": "Remove parcels"
-            },
-            "data_description": {
-              "add": "Enter a Packeta tracking code to start tracking it. You find it on the shipping confirmation or the missed-delivery card."
-            }
-          },
-          "delivered": {
-            "name": "Delivered parcels",
-            "data": {
-              "delivered_filter_type": "Filter by",
-              "delivered_filter_amount": "Amount"
-            },
-            "data_description": {
-              "delivered_filter_type": "Show delivered parcels from the last X days, or limit to the X most recent.",
-              "delivered_filter_amount": "Number of days or parcels to show."
-            }
-          },
-          "history": {
-            "name": "Parcel history",
-            "data": {
-              "include_history": "Include status history"
-            },
-            "data_description": {
-              "include_history": "Add a per-parcel history attribute listing each status update (timestamp, status, original text). Off by default."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Parcels",
+          "incoming_parcels": "Incoming parcels",
+          "outgoing_parcels": "Outgoing parcels",
           "settings": "Settings"
         }
       },
-      "parcels": {
-        "title": "Manage parcels",
+      "incoming_parcels": {
+        "title": "Manage incoming parcels",
+        "description": "Tracking codes for parcels you are expecting. Packeta's tracking data cannot tell a parcel you sent from one you are receiving, so file each code in the list it belongs to.",
+        "data": {
+          "tracking_codes": "Tracking codes"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Manage outgoing parcels",
+        "description": "Tracking codes for parcels you sent. They are counted and reported separately, so they stay out of your incoming parcel count.",
         "data": {
           "tracking_codes": "Tracking codes"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "That does not look like a Packeta tracking code.",
-      "already_tracked": "That parcel is already being tracked."
+      "invalid_tracking_code": "That does not look like a Packeta tracking code."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Days",
         "parcels": "Number of parcels"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Incoming",
+        "outgoing": "Outgoing"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Tracking code",
           "description": "The Packeta tracking code."
+        },
+        "direction": {
+          "name": "Direction",
+          "description": "Whether you are receiving this parcel or sending it. Packeta's tracking data cannot tell the two apart. Calling this again with the other direction moves an already tracked parcel."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "A parcel was registered",
       "parcel_status_changed": "A parcel's status changed",
       "parcel_delivered": "A parcel was delivered",
-      "parcel_delivery_time_changed": "A parcel's expected delivery time changed"
+      "parcel_delivery_time_changed": "A parcel's expected delivery time changed",
+      "outgoing_parcel_status_changed": "An outgoing parcel's status changed",
+      "outgoing_parcel_delivered": "An outgoing parcel was delivered"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Delivered parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "outgoing_parcels": {
+        "name": "Outgoing parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Outgoing delivered parcels",
         "unit_of_measurement": "parcels"
       },
       "last_update": {

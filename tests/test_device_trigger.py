@@ -6,7 +6,7 @@ from custom_components.packeta.device_trigger import (
 )
 
 
-async def test_get_triggers_returns_all_four(hass):
+async def test_get_triggers_returns_every_event(hass):
     triggers = await async_get_triggers(hass, "device123")
     types = {t["type"] for t in triggers}
     assert types == {
@@ -14,6 +14,8 @@ async def test_get_triggers_returns_all_four(hass):
         "parcel_status_changed",
         "parcel_delivered",
         "parcel_delivery_time_changed",
+        "outgoing_parcel_status_changed",
+        "outgoing_parcel_delivered",
     }
     for trigger in triggers:
         assert trigger["domain"] == DOMAIN
@@ -22,3 +24,7 @@ async def test_get_triggers_returns_all_four(hass):
 
 def test_trigger_events_map_to_domain_prefix():
     assert TRIGGER_EVENTS["parcel_registered"] == f"{DOMAIN}_parcel_registered"
+    assert (
+        TRIGGER_EVENTS["outgoing_parcel_delivered"]
+        == f"{DOMAIN}_outgoing_parcel_delivered"
+    )

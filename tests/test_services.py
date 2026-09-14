@@ -2,12 +2,16 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+import voluptuous as vol
 from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.packeta.const import (
+    CONF_DIRECTION,
     CONF_PARCELS,
     CONF_TRACKING_CODE,
+    DIRECTION_INCOMING,
+    DIRECTION_OUTGOING,
     DOMAIN,
 )
 
@@ -48,7 +52,9 @@ async def test_track_parcel_adds_to_options(hass):
         await hass.async_block_till_done()
 
     parcels = entry.options[CONF_PARCELS]
-    assert parcels == [{CONF_TRACKING_CODE: "EXAMPLE999999"}]
+    assert parcels == [
+        {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_INCOMING}
+    ]
 
 
 async def test_track_parcel_normalizes_code(hass):
@@ -66,7 +72,7 @@ async def test_track_parcel_normalizes_code(hass):
         await hass.async_block_till_done()
 
     assert entry.options[CONF_PARCELS] == [
-        {CONF_TRACKING_CODE: "EXAMPLE999999"}
+        {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_INCOMING}
     ]
 
 
@@ -132,3 +138,58 @@ async def test_untrack_unknown_code_is_noop(hass):
         await hass.async_block_till_done()
 
     assert len(entry.options[CONF_PARCELS]) == 1
+
+
+async def test_track_parcel_records_the_requested_direction(hass):
+    entry = await _setup(hass)
+    with patch(
+        "custom_components.packeta.api.PacketaApiClient.async_get_parcel",
+        new=AsyncMock(return_value=_SAMPLE),
+    ):
+        await hass.services.async_call(
+            DOMAIN,
+            "track_parcel",
+            {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_OUTGOING},
+            blocking=True,
+        )
+        await hass.async_block_till_done()
+
+    assert entry.options[CONF_PARCELS] == [
+        {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_OUTGOING}
+    ]
+
+
+async def test_track_parcel_again_changes_its_direction(hass):
+    """Re-tracking is how a parcel filed the wrong way gets corrected."""
+    entry = await _setup(
+        hass,
+        parcels=[
+            {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_INCOMING}
+        ],
+    )
+    with patch(
+        "custom_components.packeta.api.PacketaApiClient.async_get_parcel",
+        new=AsyncMock(return_value=_SAMPLE),
+    ):
+        await hass.services.async_call(
+            DOMAIN,
+            "track_parcel",
+            {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_OUTGOING},
+            blocking=True,
+        )
+        await hass.async_block_till_done()
+
+    assert entry.options[CONF_PARCELS] == [
+        {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: DIRECTION_OUTGOING}
+    ]
+
+
+async def test_track_parcel_rejects_an_unknown_direction(hass):
+    await _setup(hass)
+    with pytest.raises(vol.Invalid):
+        await hass.services.async_call(
+            DOMAIN,
+            "track_parcel",
+            {CONF_TRACKING_CODE: "EXAMPLE999999", CONF_DIRECTION: "sideways"},
+            blocking=True,
+        )

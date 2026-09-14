@@ -46,10 +46,11 @@ Part of the [ha-parcel-integrations](https://github.com/ha-parcel-integrations) 
 ## Features
 
 - Track any number of Packeta parcels by tracking number — no account needed
+- Incoming and outgoing parcels tracked side by side, counted separately
 - Per-parcel sensor with the canonical status (`registered` / `in_transit` / `at_pickup_point` / `delivered` / …) and the localised event history behind it
-- Summary sensors: incoming parcels, recently delivered parcels
+- Summary sensors: incoming parcels, recently delivered parcels, outgoing parcels, delivered outgoing parcels
 - `packeta.track_parcel` / `packeta.untrack_parcel` services, so a dashboard button can add a parcel
-- Events + device triggers for no-code automations (parcel registered, status changed, delivered)
+- Events + device triggers for no-code automations (parcel registered, status changed, delivered — incoming and outgoing)
 - Opt-in per-parcel status history
 - Manual refresh button and a diagnostic last-update sensor
 
@@ -78,13 +79,20 @@ Add the integration via **Settings → Devices & Services → Add Integration �
 
 Then add parcels via the integration's **Configure** dialog, the [`packeta.track_parcel`](#services) service, or a [dashboard button](examples/dashboards/add_parcel_card.yaml). The tracking code is on your shipping confirmation email or the missed-delivery card.
 
+### Incoming and outgoing parcels
+
+Parcels you are expecting and parcels you sent are kept in two separate lists, each with its own menu entry under **Configure**, and are counted by separate sensors — so a parcel you dropped off does not inflate your incoming count.
+
+Which list a code belongs in is your call, not the carrier's: Packeta's tracking data is identical for a parcel you send and one you receive (both read `sender: C2C`, with no account to compare against), so nothing in the payload can reveal it. A code entered in the other list — or re-added through `track_parcel` with the other direction — moves rather than being duplicated, which is how you correct a parcel filed the wrong way.
+
 ## Options
 
 Open **Configure** on the integration entry:
 
 | Section | Option | Default | Description |
 |---|---|---|---|
-| Parcels | Add / remove | — | Manage the tracked tracking codes. Changes apply immediately, no restart. |
+| Incoming parcels | Tracking codes | — | The parcels you are expecting. Changes apply immediately, no restart. |
+| Outgoing parcels | Tracking codes | — | The parcels you sent. Counted separately from the incoming ones. |
 | Delivered parcels | Filter by / amount | last 7 days | How long delivered parcels stay visible on the delivered sensor. |
 | Parcel history | Include status history | off | Adds a `history` attribute per parcel with each status update. |
 
@@ -123,6 +131,8 @@ Standard HA removal applies: **Settings → Devices & Services → Packeta → �
 | `sensor.packeta_parcel_<code>` | One per tracked parcel; state is the canonical status, attributes carry the full normalised parcel |
 | `sensor.packeta_next_delivery` | Earliest expected delivery moment across all active parcels (stays empty — Packeta exposes no ETA) |
 | `sensor.packeta_delivered_parcels` | Recently delivered parcels (see the retention option) |
+| `sensor.packeta_outgoing_parcels` | Number of active parcels you sent, full list under the `parcels` attribute |
+| `sensor.packeta_outgoing_delivered_parcels` | Parcels you sent that have since been delivered (see the retention option) |
 | `sensor.packeta_last_successful_update` | Diagnostic: when Packeta was last polled successfully |
 
 A delivered parcel moves from its per-parcel sensor to the delivered sensor automatically.
@@ -153,14 +163,16 @@ The integration fires these on the event bus (also available as device triggers 
 | `packeta_parcel_registered` | A new parcel appears in the active list |
 | `packeta_parcel_status_changed` | A parcel's canonical status changes (`old_status` / `new_status` in the payload), except the final hop to delivered |
 | `packeta_parcel_delivered` | A parcel is delivered |
+| `packeta_outgoing_parcel_status_changed` | A parcel you sent changes status, except the final hop to delivered |
+| `packeta_outgoing_parcel_delivered` | A parcel you sent is delivered |
 
-Every payload is the full normalised parcel plus the hub's `device_id`. Events are suppressed on the first refresh after start-up.
+Every payload is the full normalised parcel plus the hub's `device_id`. Events are suppressed on the first refresh after start-up. There is no `registered` event for an outgoing parcel: you already know you handed it over.
 
 ## Services
 
 | Service | Fields | Description |
 |---|---|---|
-| `packeta.track_parcel` | `tracking_code` | Start tracking a parcel |
+| `packeta.track_parcel` | `tracking_code`, `direction` | Start tracking a parcel. `direction` is `incoming` (default) or `outgoing`; calling it again with the other direction moves an already tracked parcel |
 | `packeta.untrack_parcel` | `tracking_code` | Stop tracking a parcel |
 
 ## Examples

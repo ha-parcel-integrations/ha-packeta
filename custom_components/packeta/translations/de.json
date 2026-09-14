@@ -15,45 +15,22 @@
     "step": {
       "init": {
         "title": "Packeta-Optionen",
-        "sections": {
-          "parcels": {
-            "name": "Pakete",
-            "data": {
-              "add": "Paket hinzufügen",
-              "remove": "Pakete entfernen"
-            },
-            "data_description": {
-              "add": "Gib einen Packeta-Tracking-Code ein, um ihn zu verfolgen. Du findest ihn auf der Versandbestätigung oder der Karte für eine verpasste Zustellung."
-            }
-          },
-          "delivered": {
-            "name": "Zugestellte Pakete",
-            "data": {
-              "delivered_filter_type": "Filtern nach",
-              "delivered_filter_amount": "Anzahl"
-            },
-            "data_description": {
-              "delivered_filter_type": "Zugestellte Pakete der letzten X Tage anzeigen oder auf die X neuesten beschränken.",
-              "delivered_filter_amount": "Anzahl der anzuzeigenden Tage oder Pakete."
-            }
-          },
-          "history": {
-            "name": "Paketverlauf",
-            "data": {
-              "include_history": "Statusverlauf einbeziehen"
-            },
-            "data_description": {
-              "include_history": "Fügt jedem Paket ein Verlaufsattribut hinzu, das jede Statusaktualisierung auflistet (Zeitstempel, Status, Originaltext). Standardmäßig deaktiviert."
-            }
-          }
-        },
         "menu_options": {
-          "parcels": "Pakete",
+          "incoming_parcels": "Eingehende Pakete",
+          "outgoing_parcels": "Ausgehende Pakete",
           "settings": "Einstellungen"
         }
       },
-      "parcels": {
-        "title": "Pakete",
+      "incoming_parcels": {
+        "title": "Eingehende Pakete verwalten",
+        "description": "Sendungsnummern von Paketen, die du erwartest. Die Tracking-Daten von Packeta können ein selbst versendetes Paket nicht von einem empfangenen unterscheiden – trage jede Nummer daher in die passende Liste ein.",
+        "data": {
+          "tracking_codes": "Sendungsnummern"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Ausgehende Pakete verwalten",
+        "description": "Sendungsnummern von Paketen, die du versendet hast. Sie werden separat gezählt und fließen nicht in deine eingehenden Pakete ein.",
         "data": {
           "tracking_codes": "Sendungsnummern"
         }
@@ -68,8 +45,7 @@
       }
     },
     "error": {
-      "invalid_tracking_code": "Das sieht nicht wie ein Packeta-Tracking-Code aus.",
-      "already_tracked": "Dieses Paket wird bereits verfolgt."
+      "invalid_tracking_code": "Das sieht nicht wie ein Packeta-Tracking-Code aus."
     }
   },
   "selector": {
@@ -77,6 +53,12 @@
       "options": {
         "days": "Tage",
         "parcels": "Anzahl der Pakete"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Eingehend",
+        "outgoing": "Ausgehend"
       }
     }
   },
@@ -88,6 +70,10 @@
         "tracking_code": {
           "name": "Tracking-Code",
           "description": "Der Packeta-Tracking-Code."
+        },
+        "direction": {
+          "name": "Richtung",
+          "description": "Ob du dieses Paket empfängst oder versendest. Die Tracking-Daten von Packeta können das nicht unterscheiden. Ein erneuter Aufruf mit der anderen Richtung verschiebt ein bereits verfolgtes Paket."
         }
       }
     },
@@ -107,7 +93,9 @@
       "parcel_registered": "Ein Paket wurde registriert",
       "parcel_status_changed": "Der Status eines Pakets hat sich geändert",
       "parcel_delivered": "Ein Paket wurde zugestellt",
-      "parcel_delivery_time_changed": "Die voraussichtliche Zustellzeit eines Pakets hat sich geändert"
+      "parcel_delivery_time_changed": "Die voraussichtliche Zustellzeit eines Pakets hat sich geändert",
+      "outgoing_parcel_status_changed": "Der Status eines ausgehenden Pakets hat sich geändert",
+      "outgoing_parcel_delivered": "Ein ausgehendes Paket wurde zugestellt"
     }
   },
   "entity": {
@@ -135,6 +123,14 @@
       },
       "delivered_parcels": {
         "name": "Zugestellte Pakete",
+        "unit_of_measurement": "Pakete"
+      },
+      "outgoing_parcels": {
+        "name": "Ausgehende Pakete",
+        "unit_of_measurement": "Pakete"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Ausgehende zugestellte Pakete",
         "unit_of_measurement": "Pakete"
       },
       "last_update": {

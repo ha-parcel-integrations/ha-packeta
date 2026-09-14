@@ -1,8 +1,13 @@
 # Add a Packeta parcel straight from a dashboard — no diving into the options.
 #
 # The integration exposes two services:
-#   - packeta.track_parcel   (tracking_code)
+#   - packeta.track_parcel   (tracking_code, direction)
 #   - packeta.untrack_parcel (tracking_code)
+#
+# ``direction`` is incoming (the default) or outgoing — Packeta's tracking data
+# cannot tell the two apart, so a parcel you send has to say so. Add
+# ``direction: outgoing`` below for a "track a parcel I sent" variant of this
+# card.
 #
 # This example wires a text field + a button on a Lovelace card to
 # packeta.track_parcel. It needs one helper and one script (below), then the card.

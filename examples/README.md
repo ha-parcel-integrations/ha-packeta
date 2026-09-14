@@ -15,7 +15,7 @@ All examples assume a single Packeta hub. Adjust entity IDs to match yours.
 
 | Service | Description |
 |---|---|
-| `packeta.track_parcel` | Start tracking a parcel (`tracking_code`). |
+| `packeta.track_parcel` | Start tracking a parcel (`tracking_code`, and `direction: incoming`/`outgoing` for one you sent). |
 | `packeta.untrack_parcel` | Stop tracking a parcel (`tracking_code`). |
 
 ## Events used in the examples
