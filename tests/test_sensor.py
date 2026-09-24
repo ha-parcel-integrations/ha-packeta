@@ -61,14 +61,14 @@ def test_incoming_counts_and_lists():
     assert len(sensor.extra_state_attributes["parcels"]) == 2
 
 
-def test_awaiting_pickup_counts_only_ready_pickup_point_parcels():
+def test_awaiting_pickup_counts_every_parcel_at_pickup_point():
     ready = _parcel("A", ParcelStatus.AT_PICKUP_POINT, pickup=True)
     coordinator = _coordinator(
         [ready, _parcel("B"), _parcel("C", ParcelStatus.AT_PICKUP_POINT)]
     )
     sensor = PacketaAwaitingPickupSensor(coordinator, _entry())
-    assert sensor.native_value == 1
-    assert sensor.extra_state_attributes == {"parcels": [ready]}
+    assert sensor.native_value == 2
+    assert len(sensor.extra_state_attributes["parcels"]) == 2
 
 
 def test_awaiting_pickup_zero_when_no_parcels():
