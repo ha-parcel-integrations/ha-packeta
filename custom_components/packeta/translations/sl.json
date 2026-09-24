@@ -115,7 +115,7 @@
         "unit_of_measurement": "paketov"
       },
       "awaiting_pickup": {
-        "name": "Čaka na prevzem",
+        "name": "Pripravljeno za prevzem",
         "unit_of_measurement": "paketov"
       },
       "next_delivery": {
