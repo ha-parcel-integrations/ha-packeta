@@ -2,7 +2,7 @@
   "domain": "packeta",
   "name": "Packeta & Zásilkovna",
   "codeowners": [
-    "@peternijssen"
+    "@peter-mdf"
   ],
   "config_flow": true,
   "documentation": "https://github.com/ha-parcel-integrations/ha-packeta",
