@@ -15,8 +15,8 @@ Part of the [ha-parcel-integrations](https://ha-parcel-integrations.github.io/) 
 >
 > The endpoint is live and keyless, and the success payload shape has been
 > confirmed against real delivered parcels. Six `packetStatusId` values are
-> mapped so far (one of them, `3`/delivered, seen live; the rest reconstructed
-> from a maintained open-source client). Anything unmapped reports
+> mapped so far (one of them, `3`/delivered, seen live; the rest not yet
+> confirmed on a real parcel). Anything unmapped reports
 > **`unknown`** (never a wrong status) and logs a one-shot warning with a
 > ready-made issue link — please
 > [report it](https://github.com/ha-parcel-integrations/ha-packeta/issues/new?template=unrecognised_status.yml)
