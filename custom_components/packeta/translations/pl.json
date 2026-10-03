@@ -52,7 +52,7 @@
     "delivered_filter_type": {
       "options": {
         "days": "Dni",
-        "parcels": "Liczba paczek"
+        "parcels": "Liczba przesyłek"
       }
     },
     "direction": {
@@ -111,33 +111,33 @@
     },
     "sensor": {
       "incoming_parcels": {
-        "name": "Nadchodzące paczki",
-        "unit_of_measurement": "paczki"
+        "name": "Nadchodzące przesyłki",
+        "unit_of_measurement": "przesyłki"
       },
       "awaiting_pickup": {
         "name": "Oczekuje na odbiór",
-        "unit_of_measurement": "paczki"
+        "unit_of_measurement": "przesyłki"
       },
       "next_delivery": {
         "name": "Następna dostawa"
       },
       "delivered_parcels": {
-        "name": "Dostarczone paczki",
-        "unit_of_measurement": "paczki"
+        "name": "Doręczone przesyłki",
+        "unit_of_measurement": "przesyłki"
       },
       "outgoing_parcels": {
-        "name": "Paczki wychodzące",
-        "unit_of_measurement": "paczki"
+        "name": "Wysyłane przesyłki",
+        "unit_of_measurement": "przesyłki"
       },
       "outgoing_delivered_parcels": {
-        "name": "Dostarczone paczki wychodzące",
-        "unit_of_measurement": "paczki"
+        "name": "Doręczone wysyłane przesyłki",
+        "unit_of_measurement": "przesyłki"
       },
       "last_update": {
         "name": "Ostatnia udana aktualizacja"
       },
       "parcel": {
-        "name": "Paczka {barcode}"
+        "name": "Przesyłka {barcode}"
       }
     }
   }

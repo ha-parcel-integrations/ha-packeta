@@ -119,7 +119,7 @@
         "unit_of_measurement": "zásielky"
       },
       "next_delivery": {
-        "name": "Ďalšie doručenie"
+        "name": "Očakávané doručenie"
       },
       "delivered_parcels": {
         "name": "Doručené zásielky",
