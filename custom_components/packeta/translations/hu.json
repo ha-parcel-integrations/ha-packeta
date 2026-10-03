@@ -51,7 +51,7 @@
   "selector": {
     "delivered_filter_type": {
       "options": {
-        "days": "Napok",
+        "days": "Nap",
         "parcels": "Csomagok száma"
       }
     },
@@ -137,7 +137,7 @@
         "name": "Utolsó sikeres frissítés"
       },
       "parcel": {
-        "name": "{barcode} csomag"
+        "name": "Csomag {barcode}"
       }
     }
   }

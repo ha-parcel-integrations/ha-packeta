@@ -111,7 +111,7 @@
     },
     "sensor": {
       "incoming_parcels": {
-        "name": "Colete în curs de livrare",
+        "name": "Colete primite",
         "unit_of_measurement": "colete"
       },
       "awaiting_pickup": {
@@ -137,7 +137,7 @@
         "name": "Ultima actualizare reușită"
       },
       "parcel": {
-        "name": "Coletul {barcode}"
+        "name": "Colet {barcode}"
       }
     }
   }
