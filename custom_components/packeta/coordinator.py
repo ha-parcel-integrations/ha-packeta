@@ -131,6 +131,8 @@ class PacketaCoordinator(DataUpdateCoordinator[list[dict]]):
     the code was filed under — Packeta's payload cannot supply it.
     """
 
+    config_entry: ConfigEntry
+
     def __init__(
         self,
         hass: HomeAssistant,
