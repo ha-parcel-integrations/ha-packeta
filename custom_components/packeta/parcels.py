@@ -11,10 +11,11 @@ The carrier-specific parts are :data:`_STATUS_MAP`, :func:`build_history` and
 — the sort contract, the delivered filter, the one-shot warning for unmapped
 statuses — is suite-wide machinery and should be left alone.
 """
+
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -57,12 +58,12 @@ NEW_ISSUE_URL = (
 # stays incomplete by design: unmapped ids land as ``unknown`` plus a one-shot
 # warning that asks the user to report them.
 _STATUS_MAP: dict[str, ParcelStatus] = {
-    "997": ParcelStatus.REGISTERED,        # TO_BE_PROCESSED
-    "1": ParcelStatus.IN_TRANSIT,          # WAITING_FOR_DELIVERY (in warehouse)
-    "31": ParcelStatus.IN_TRANSIT,         # ON_THE_WAY
-    "2": ParcelStatus.AT_PICKUP_POINT,     # READY_FOR_PICKUP
-    "3": ParcelStatus.DELIVERED,           # ISSUED_AND_ACCOUNTED
-    "21": ParcelStatus.PROBLEM,            # LOST_OR_UNKNOWN
+    "997": ParcelStatus.REGISTERED,  # TO_BE_PROCESSED
+    "1": ParcelStatus.IN_TRANSIT,  # WAITING_FOR_DELIVERY (in warehouse)
+    "31": ParcelStatus.IN_TRANSIT,  # ON_THE_WAY
+    "2": ParcelStatus.AT_PICKUP_POINT,  # READY_FOR_PICKUP
+    "3": ParcelStatus.DELIVERED,  # ISSUED_AND_ACCOUNTED
+    "21": ParcelStatus.PROBLEM,  # LOST_OR_UNKNOWN
 }
 
 # Status codes we have already warned about, so each unmapped one is logged
@@ -123,11 +124,11 @@ def parse_iso(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value))
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
+        parsed = parsed.replace(tzinfo=UTC)
     return parsed
 
 
@@ -155,12 +156,12 @@ def to_iso_timestamp(value: Any) -> str | None:
         return None
     if isinstance(value, (int, float)):
         try:
-            return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
+            return datetime.fromtimestamp(value / 1000, tz=UTC).isoformat()
         except (OverflowError, OSError, ValueError):
             return None
     text = str(value)
     try:
-        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(text)
     except ValueError:
         return text
     if parsed.tzinfo is not None:
@@ -245,7 +246,8 @@ _unparsed_time_logged = False
 
 def _note_unparsed_time(value: Any) -> None:
     """One-shot: flag an event time that didn't match the confirmed shape."""
-    global _unparsed_time_logged
+    # Module-level flag by design: one warning per process, not per poll.
+    global _unparsed_time_logged  # noqa: PLW0603
     if _unparsed_time_logged:
         return
     _unparsed_time_logged = True
@@ -433,14 +435,12 @@ def apply_delivered_filter(parcels: list[dict], entry: ConfigEntry) -> list[dict
     shows.
     """
     options = entry.options
-    filter_type = options.get(
-        CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE
-    )
+    filter_type = options.get(CONF_DELIVERED_FILTER_TYPE, DEFAULT_DELIVERED_FILTER_TYPE)
     amount = int(
         options.get(CONF_DELIVERED_FILTER_AMOUNT, DEFAULT_DELIVERED_FILTER_AMOUNT)
     )
     if filter_type == "days":
-        cutoff = datetime.now(timezone.utc) - timedelta(days=amount)
+        cutoff = datetime.now(UTC) - timedelta(days=amount)
         return [
             parcel
             for parcel in parcels

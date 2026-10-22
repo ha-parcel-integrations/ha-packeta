@@ -1,4 +1,5 @@
 """Tests for the Packeta refresh button."""
+
 from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.packeta.button import PacketaRefreshButton

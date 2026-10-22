@@ -1,4 +1,5 @@
 """Diagnostics support for the Packeta parcel tracker integration."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -14,16 +15,15 @@ from . import PacketaConfigEntry
 TO_REDACT = {
     # canonical fields we publish ourselves
     "tracking_code",
-    "barcode",
+    "barcode",  # the tracking number
     "sender",
     "receiver",
     "url",
     "pickup_point",
     # Packeta payload fields (``item``)
-    "barcode",           # the tracking number
-    "trackingNumber",    # coordinator's injected fallback key
-    "orderNumber",       # ties to a specific merchant order
-    "senderUrl",         # the merchant's own site
+    "trackingNumber",  # coordinator's injected fallback key
+    "orderNumber",  # ties to a specific merchant order
+    "senderUrl",  # the merchant's own site
     # branch/pickup-point fields, confirmed against a real parcel
     "branchAddress",
     "branchAddressFull",

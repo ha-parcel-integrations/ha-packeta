@@ -1,14 +1,12 @@
 """Tests for the Packeta API client."""
+
 import json
 from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp
 import pytest
 
-from custom_components.packeta.api import (
-    PacketaApiClient,
-    PacketaApiError,
-)
+from custom_components.packeta.api import PacketaApiClient, PacketaApiError
 
 CODE = "Z9998887776"
 

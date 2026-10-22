@@ -1,8 +1,9 @@
 """Sensor platform for the Packeta parcel tracker integration."""
+
 from __future__ import annotations
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -40,7 +41,6 @@ def _active_barcodes(coordinator: PacketaCoordinator) -> set[str]:
     return {p.get("barcode", "") for p in _active_parcels(coordinator)}
 
 
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: PacketaConfigEntry,
@@ -75,7 +75,7 @@ async def async_setup_entry(
             and entity_entry.unique_id.startswith(f"{entry_id}_")
             and entity_entry.unique_id not in non_parcel_unique_ids
         ):
-            barcode = entity_entry.unique_id[len(f"{entry_id}_"):]
+            barcode = entity_entry.unique_id[len(f"{entry_id}_") :]
             if barcode not in current_barcodes:
                 registry.async_remove(entity_entry.entity_id)
 
@@ -85,10 +85,10 @@ async def async_setup_entry(
         ),
         PacketaAwaitingPickupSensor(coordinator, entry),
     ]
-    for parcel in _active_parcels(coordinator):
-        entities.append(
-            PacketaParcelSensor(coordinator, entry, parcel.get("barcode", ""))
-        )
+    entities.extend(
+        PacketaParcelSensor(coordinator, entry, parcel.get("barcode", ""))
+        for parcel in _active_parcels(coordinator)
+    )
     entities.append(PacketaNextDeliverySensor(coordinator, entry))
     entities.append(PacketaDeliveredParcelsSensor(coordinator, entry))
     entities.append(PacketaOutgoingParcelsSensor(coordinator, entry))
@@ -98,9 +98,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class PacketaIncomingParcelsSensor(
-    CoordinatorEntity[PacketaCoordinator], SensorEntity
-):
+class PacketaIncomingParcelsSensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
     """Summary sensor: count of active (not-yet-delivered) incoming parcels.
 
     Spawns a per-parcel sensor for each new barcode — in **both** directions,
@@ -164,9 +162,7 @@ class PacketaIncomingParcelsSensor(
         super()._handle_coordinator_update()
 
 
-class PacketaAwaitingPickupSensor(
-    CoordinatorEntity[PacketaCoordinator], SensorEntity
-):
+class PacketaAwaitingPickupSensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
     """Parcels that have arrived at a pickup point and are ready to collect."""
 
     _attr_has_entity_name = True
@@ -237,9 +233,7 @@ class PacketaParcelSensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
         return dict(parcel) if parcel else {}
 
 
-class PacketaNextDeliverySensor(
-    CoordinatorEntity[PacketaCoordinator], SensorEntity
-):
+class PacketaNextDeliverySensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
     """Earliest expected delivery datetime across all active parcels."""
 
     _attr_has_entity_name = True
@@ -247,9 +241,7 @@ class PacketaNextDeliverySensor(
     _attr_device_class = SensorDeviceClass.TIMESTAMP
     _attr_attribution = ATTRIBUTION
 
-    def __init__(
-        self, coordinator: PacketaCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: PacketaCoordinator, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_next_delivery"
@@ -299,9 +291,7 @@ class PacketaDeliveredParcelsSensor(
     _attr_attribution = ATTRIBUTION
     _unrecorded_attributes = frozenset({"parcels"})
 
-    def __init__(
-        self, coordinator: PacketaCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: PacketaCoordinator, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_delivered_parcels"
@@ -318,9 +308,7 @@ class PacketaDeliveredParcelsSensor(
         return {"parcels": self.coordinator.delivered}
 
 
-class PacketaOutgoingParcelsSensor(
-    CoordinatorEntity[PacketaCoordinator], SensorEntity
-):
+class PacketaOutgoingParcelsSensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
     """Active (not-yet-delivered) parcels the user is sending."""
 
     _attr_has_entity_name = True
@@ -329,9 +317,7 @@ class PacketaOutgoingParcelsSensor(
     _attr_attribution = ATTRIBUTION
     _unrecorded_attributes = frozenset({"parcels"})
 
-    def __init__(
-        self, coordinator: PacketaCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: PacketaCoordinator, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_outgoing_parcels"
@@ -359,9 +345,7 @@ class PacketaOutgoingDeliveredParcelsSensor(
     _attr_attribution = ATTRIBUTION
     _unrecorded_attributes = frozenset({"parcels"})
 
-    def __init__(
-        self, coordinator: PacketaCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: PacketaCoordinator, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_outgoing_delivered_parcels"
@@ -378,9 +362,7 @@ class PacketaOutgoingDeliveredParcelsSensor(
         return {"parcels": self.coordinator.delivered_outgoing or []}
 
 
-class PacketaLastUpdateSensor(
-    CoordinatorEntity[PacketaCoordinator], SensorEntity
-):
+class PacketaLastUpdateSensor(CoordinatorEntity[PacketaCoordinator], SensorEntity):
     """Diagnostic sensor reporting when Packeta was last polled successfully."""
 
     _attr_has_entity_name = True
@@ -389,9 +371,7 @@ class PacketaLastUpdateSensor(
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_attribution = ATTRIBUTION
 
-    def __init__(
-        self, coordinator: PacketaCoordinator, entry: ConfigEntry
-    ) -> None:
+    def __init__(self, coordinator: PacketaCoordinator, entry: ConfigEntry) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_last_update"

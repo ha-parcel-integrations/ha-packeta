@@ -14,6 +14,7 @@ substring matches exercise real text rather than paraphrases. The other five
 ``packetStatusId`` values remain reconstructed from the maintained client
 ``itsvic-dev/deliveries``.
 """
+
 from __future__ import annotations
 
 # Realistic-shaped Packeta "Z" numbers, distinct per sample.
@@ -49,8 +50,7 @@ def delivered_sample(code: str = DELIVERED_CODE) -> dict:
                 "2026-04-29 08:46:00",
             ),
             event(
-                "The parcel is with you. Thank you, and we look forward to "
-                "next time.",
+                "The parcel is with you. Thank you, and we look forward to next time.",
                 "2026-04-29 13:12:42",
             ),
         ],

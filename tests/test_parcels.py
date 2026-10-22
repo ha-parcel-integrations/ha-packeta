@@ -4,7 +4,8 @@ These need no Home Assistant instance — the whole point of keeping
 ``parcels.py`` free of I/O is that the carrier-specific mapping (the part you
 rewrite per carrier) can be tested as plain functions.
 """
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -38,7 +39,7 @@ from .payloads import active_sample, delivered_sample, event, pickup_sample
 
 
 @pytest.mark.parametrize(
-    "code,expected",
+    ("code", "expected"),
     [
         ("997", ParcelStatus.REGISTERED),
         ("1", ParcelStatus.IN_TRANSIT),
@@ -102,7 +103,7 @@ def test_parseable_event_time_is_silent(caplog):
 def test_parse_iso_handles_z_naive_and_garbage():
     assert parse_iso("2026-04-29T13:12:42Z").tzinfo is not None
     # A naive value is assumed UTC so mixed lists still sort.
-    assert parse_iso("2026-04-29T13:12:42").tzinfo == timezone.utc
+    assert parse_iso("2026-04-29T13:12:42").tzinfo == UTC
     assert parse_iso("not-a-date") is None
     assert parse_iso(None) is None
 
@@ -158,14 +159,16 @@ def test_build_history_maps_known_canned_sentences():
 
 
 def test_build_history_unrecognised_sentence_stays_null(caplog):
-    history = build_history([event("A brand new carrier sentence.", "2026-04-24T10:00:00Z")])
+    history = build_history(
+        [event("A brand new carrier sentence.", "2026-04-24T10:00:00Z")]
+    )
     assert history[0]["status"] is None
     assert "Unrecognised Packeta history text" in caplog.text
     assert "issues/new" in caplog.text
 
 
 @pytest.mark.parametrize(
-    "text,expected",
+    ("text", "expected"),
     [
         (
             "The parcel has been assigned a tracking number: "
@@ -197,7 +200,7 @@ def test_build_history_maps_reshipper_and_exception_sentences(text, expected):
 
 
 def test_build_history_administrative_note_stays_unmapped():
-    """"Customer was informed ..." carries no status of its own — deliberately
+    """ "Customer was informed ..." carries no status of its own — deliberately
     left unmapped rather than guessed."""
     text = "Customer was informed about the actual parcel status via individual message"
     assert build_history([event(text, "2026-04-24T10:00:00Z")])[0]["status"] is None
@@ -404,7 +407,7 @@ def _entry(filter_type: str, amount: int) -> MockConfigEntry:
 
 
 def _delivered_pair() -> list[dict]:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return [
         {"barcode": "RECENT", "delivered_at": (now - timedelta(days=1)).isoformat()},
         {"barcode": "OLD", "delivered_at": (now - timedelta(days=30)).isoformat()},
@@ -434,4 +437,4 @@ def test_capabilities_are_known_values():
 
 def test_capabilities_are_url_history_and_pickup_point():
     """Confirmed against a real parcel: still no weight, dimensions, or ETA."""
-    assert CAPABILITIES == {"url", "history", "pickup_point"}
+    assert {"url", "history", "pickup_point"} == CAPABILITIES

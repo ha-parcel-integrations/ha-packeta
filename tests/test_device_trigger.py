@@ -1,9 +1,7 @@
 """Tests for Packeta device triggers."""
+
 from custom_components.packeta.const import DOMAIN
-from custom_components.packeta.device_trigger import (
-    TRIGGER_EVENTS,
-    async_get_triggers,
-)
+from custom_components.packeta.device_trigger import TRIGGER_EVENTS, async_get_triggers
 
 
 async def test_get_triggers_returns_every_event(hass):
