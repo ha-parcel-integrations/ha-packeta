@@ -48,8 +48,8 @@ NEW_ISSUE_URL = (
 
 # Packeta ``packetStatusId`` (a numeric code, as a string) → canonical status.
 #
-# These six come from the maintained client ``itsvic-dev/deliveries``; the
-# semantic meaning is in the trailing comment. Two deliberately use our more
+# These six come from a third-party client; the semantic meaning is in the
+# trailing comment. Two deliberately use our more
 # granular enum: ``997`` (to-be-processed) → REGISTERED rather than in-transit,
 # and ``21`` (lost/unknown) → PROBLEM rather than unknown, since a lost parcel
 # is an exception worth surfacing. ``3`` is confirmed live: a real delivered

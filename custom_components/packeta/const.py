@@ -57,10 +57,10 @@ CAPABILITIES = frozenset({"url", "history", "pickup_point"})
 #   ``{"error": "notFound", ...}`` — a normal, expected state, not an error.
 #
 # Verified live 2026-07-26 (404 on a fake number). The success payload shape
-# and the ``packetStatusId`` map were reconstructed from the maintained client
-# ``itsvic-dev/deliveries`` and confirmed live against real delivered parcels
-# 2026-08-19. The other five status ids remain reconstructed only. Rate
-# limiting is still unmeasured; revisit ``--interval fixed`` if it throttles.
+# and the ``packetStatusId`` map were reconstructed from a third-party client
+# and confirmed live against real delivered parcels 2026-08-19. The other five
+# status ids remain reconstructed only. Rate limiting is still unmeasured;
+# revisit ``--interval fixed`` if it throttles.
 TRACKING_API_URL = (
     "https://tracking.packeta.com/api/getPacketById/{tracking_code}/{locale}"
 )
