@@ -1,6 +1,7 @@
 {
   "domain": "packeta",
   "name": "Packeta & Zásilkovna",
+  "categories": ["productivity_information"],
   "codeowners": [
     "@peter-mdf"
   ],
