@@ -72,12 +72,32 @@ map stays incomplete by design (unknown ids → `unknown` + one-shot warning).
   substring regardless of the account holder's language, since
   `TRACKING_LOCALE` is hardcoded to `"en"`. **`None` on purpose:**
   `receiver`, `weight`, `dimensions` — not in the payload. `sender` and
-  `pickup_point` are now populated (`item.sender` / `item.branchAddress`).
+  `pickup_point` are populated (`item.sender` / `item.branchAddress`).
   `trackingDetails[].time` is naive and anchored to `Europe/Prague` (Packeta is
   domestic to Czechia) rather than UTC — see `_PRAGUE` in `parcels.py`.
   Reflected in `const.py`'s `CAPABILITIES` (feeds the docs site's comparison
   table) — keep
   the two in agreement if that ever changes.
+
+- **Pickup.** Packeta delivers to pickup points and Z-BOX lockers, so it
+  exposes both `awaiting_pickup` and `en_route_to_pickup_point`. `pickup` is
+  `is_pickup(branchAddress present, status, event statuses)`: the branch field
+  first, then any history sentence that maps to `at_pickup_point`, so it stays
+  `True` after collection. `pickup_point` is `branchAddress`, only when
+  `pickup`. A courier-delivered parcel without `branchAddress` has not been
+  seen on a real payload yet (pending); until then `pickup` there falls back to
+  the sentences.
+- **`delivered_at`** is the time of the history sentence that maps to
+  `DELIVERED` ("the parcel is with you", the collection moment), never the
+  newest event. A delivered parcel whose delivery sentence is not recognised
+  publishes `None`.
+- **Documented divergence from the contract:** `pickup_point` is the whole
+  one-line `branchAddress` (name plus street, e.g. "Example Pickup Point,
+  Example Street 1"), not the bare name. The payload gives no separate name
+  field, so splitting the string would be a guess; kept as the carrier sends it.
+- **`planned_*` stay `None`**: Packeta carries no ETA, so there is no window to
+  feed `planned_window`; the helpers are present for parity and the emptying
+  rule holds trivially.
 
 - **Direction is declared by the user, never inferred.** Packeta is
   account-less *and* its payload cannot separate the two directions: a C2C

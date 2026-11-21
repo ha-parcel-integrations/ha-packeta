@@ -114,6 +114,10 @@
         "name": "Prihajajoči paketi",
         "unit_of_measurement": "paketi"
       },
+      "en_route_to_pickup_point": {
+        "name": "Na poti do prevzemnega mesta",
+        "unit_of_measurement": "paketi"
+      },
       "awaiting_pickup": {
         "name": "Pripravljeno za prevzem",
         "unit_of_measurement": "paketi"

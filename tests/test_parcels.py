@@ -336,7 +336,7 @@ def test_normalize_pickup_parcel():
 
 def test_normalize_pickup_point_absent_is_none():
     """A payload without branchAddress (e.g. a courier-delivered parcel) stays None."""
-    raw = pickup_sample()
+    raw = active_sample()
     del raw["branchAddress"]
     parcel = normalize_parcel(raw)
     assert parcel["pickup_point"] is None

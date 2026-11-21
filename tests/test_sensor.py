@@ -7,6 +7,7 @@ from custom_components.packeta.const import ParcelStatus
 from custom_components.packeta.sensor import (
     PacketaAwaitingPickupSensor,
     PacketaDeliveredParcelsSensor,
+    PacketaEnRouteToPickupPointSensor,
     PacketaIncomingParcelsSensor,
     PacketaLastUpdateSensor,
     PacketaNextDeliverySensor,
@@ -101,12 +102,12 @@ def test_parcel_sensor_missing_barcode():
 def test_next_delivery_picks_earliest():
     coordinator = _coordinator(
         [
-            _parcel("A", planned_from="2026-05-02T10:00:00Z"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("A", planned_from="2099-05-02T10:00:00Z"),
+            _parcel("B", planned_from="2099-05-01T10:00:00Z"),
         ]
     )
     sensor = PacketaNextDeliverySensor(coordinator, _entry())
-    assert sensor.native_value == datetime(2026, 5, 1, 10, 0, tzinfo=UTC)
+    assert sensor.native_value == datetime(2099, 5, 1, 10, 0, tzinfo=UTC)
     assert sensor.extra_state_attributes["barcode"] == "B"
 
 
@@ -120,7 +121,7 @@ def test_next_delivery_skips_unparseable_moment():
     coordinator = _coordinator(
         [
             _parcel("A", planned_from="not-a-date"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("B", planned_from="2099-05-01T10:00:00Z"),
         ]
     )
     sensor = PacketaNextDeliverySensor(coordinator, _entry())
@@ -177,7 +178,43 @@ def test_awaiting_pickup_ignores_outgoing_parcels():
 
 def test_next_delivery_ignores_outgoing_parcels():
     coordinator = _coordinator(
-        [], outgoing=[_parcel("C", planned_from="2026-05-01T10:00:00Z")]
+        [], outgoing=[_parcel("C", planned_from="2099-05-01T10:00:00Z")]
     )
     sensor = PacketaNextDeliverySensor(coordinator, _entry())
     assert sensor.native_value is None
+
+
+def test_next_delivery_skips_a_parcel_whose_window_has_ended():
+    coordinator = _coordinator(
+        [
+            _parcel("OLD", planned_from="2020-05-01T10:00:00Z"),
+            _parcel("NEW", planned_from="2099-05-01T10:00:00Z"),
+        ]
+    )
+    sensor = PacketaNextDeliverySensor(coordinator, _entry())
+    assert sensor.extra_state_attributes["barcode"] == "NEW"
+
+
+def test_en_route_and_awaiting_pickup_split():
+    parcels = [
+        _parcel("EN_ROUTE", pickup=True),
+        _parcel("READY", ParcelStatus.AT_PICKUP_POINT, pickup=True),
+        _parcel("BACK", ParcelStatus.RETURNING, pickup=True),
+        _parcel("HOME"),
+    ]
+    en_route = PacketaEnRouteToPickupPointSensor(_coordinator(parcels), _entry())
+    awaiting = PacketaAwaitingPickupSensor(_coordinator(parcels), _entry())
+    assert en_route.unique_id == "e1_en_route_to_pickup_point"
+    assert [p["barcode"] for p in en_route.extra_state_attributes["parcels"]] == [
+        "EN_ROUTE"
+    ]
+    assert [p["barcode"] for p in awaiting.extra_state_attributes["parcels"]] == [
+        "READY"
+    ]
+    assert en_route.native_value == 1
+
+
+def test_en_route_zero_without_data():
+    coordinator = _coordinator([])
+    coordinator.data = None
+    assert PacketaEnRouteToPickupPointSensor(coordinator, _entry()).native_value == 0
