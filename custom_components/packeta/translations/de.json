@@ -74,6 +74,10 @@
         "direction": {
           "name": "Richtung",
           "description": "Ob du dieses Paket empfängst oder versendest. Die Tracking-Daten von Packeta können das nicht unterscheiden. Ein erneuter Aufruf mit der anderen Richtung verschiebt ein bereits verfolgtes Paket."
+        },
+        "contents": {
+          "name": "Inhalt",
+          "description": "Was im Paket ist, in deinen eigenen Worten. Ein erneuter Aufruf für ein verfolgtes Paket ersetzt den Inhalt; ein leerer Text löscht ihn."
         }
       }
     },
@@ -84,6 +88,20 @@
         "tracking_code": {
           "name": "Tracking-Code",
           "description": "Der Packeta-Tracking-Code, der nicht mehr verfolgt werden soll."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Paketinhalt aktualisieren",
+      "description": "Lege für eine Sendungsnummer fest, was im Paket ist, in deinen eigenen Worten. Ein leerer Text löscht den Inhalt.",
+      "fields": {
+        "tracking_code": {
+          "name": "Tracking-Code",
+          "description": "Der Packeta-Tracking-Code."
+        },
+        "contents": {
+          "name": "Inhalt",
+          "description": "Was im Paket ist, in deinen eigenen Worten. Ein leerer Text löscht ihn."
         }
       }
     }

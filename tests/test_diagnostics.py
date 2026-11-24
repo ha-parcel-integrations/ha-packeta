@@ -14,6 +14,7 @@ async def test_diagnostics_redacts_and_counts(hass):
             "barcode": "Z1112223334",
             "sender": "Example Sender s.r.o.",
             "receiver": None,
+            "contents": "Running shoes",
             "status": "in_transit",
             "raw": {
                 "barcode": "Z1112223334",
@@ -47,6 +48,7 @@ async def test_diagnostics_redacts_and_counts(hass):
     assert result["incoming"][0]["raw"]["barcode"] == "**REDACTED**"
     # confirmed against a real parcel: merchant name, order and branch address
     assert result["incoming"][0]["sender"] == "**REDACTED**"
+    assert result["incoming"][0]["contents"] == "**REDACTED**"
     assert result["incoming"][0]["raw"]["orderNumber"] == "**REDACTED**"
     assert result["incoming"][0]["raw"]["branchAddress"] == "**REDACTED**"
     # non-identifying fields survive, or the diagnostics would be useless

@@ -50,6 +50,7 @@ A custom Home Assistant integration that tracks your [Packeta](https://www.packe
 - Per-parcel sensor with the canonical status (`registered` / `in_transit` / `at_pickup_point` / `delivered` / …) and the localised event history behind it
 - Summary sensors: incoming parcels, recently delivered parcels, outgoing parcels, delivered outgoing parcels
 - `packeta.track_parcel` / `packeta.untrack_parcel` services, so a dashboard button can add a parcel
+- A `contents` note per parcel (`packeta.update_contents`), stored locally; it titles the calendar event and shows on the next-delivery sensor
 - Events + device triggers for no-code automations (parcel registered, status changed, delivered — incoming and outgoing)
 - Opt-in per-parcel status history
 - Manual refresh button and a diagnostic last-update sensor
@@ -181,8 +182,11 @@ Every payload is the full normalised parcel plus the hub's `device_id`. Events a
 
 | Service | Fields | Description |
 |---|---|---|
-| `packeta.track_parcel` | `tracking_code`, `direction` | Start tracking a parcel. `direction` is `incoming` (default) or `outgoing`; calling it again with the other direction moves an already tracked parcel |
+| `packeta.track_parcel` | `tracking_code`, `direction`, `contents` (optional) | Start tracking a parcel. `direction` is `incoming` (default) or `outgoing`; calling it again with the other direction moves an already tracked parcel |
 | `packeta.untrack_parcel` | `tracking_code` | Stop tracking a parcel |
+| `packeta.update_contents` | `tracking_code`, `contents` | Set, replace or clear (empty text) a note on what is in a parcel |
+
+The `contents` text is stored locally, never sent to Packeta, and fills the parcel's `contents` field; it titles the parcel's calendar event and shows on the next-delivery sensor.
 
 ## Examples
 

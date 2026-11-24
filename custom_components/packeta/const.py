@@ -33,7 +33,15 @@ PLATFORMS = [Platform.BUTTON, Platform.CALENDAR, Platform.SENSOR]
 # subset of this — it exists so a typo in CAPABILITIES fails a test instead of
 # silently dropping this carrier off a table on the docs site.
 KNOWN_CAPABILITIES = frozenset(
-    {"weight", "dimensions", "delivery_window", "pickup_point", "url", "history"}
+    {
+        "weight",
+        "dimensions",
+        "delivery_window",
+        "pickup_point",
+        "url",
+        "history",
+        "contents",
+    }
 )
 
 # Which optional contract fields this carrier's API actually populates — feeds
@@ -73,6 +81,7 @@ TRACKING_URL = "https://tracking.packeta.com/en/?id={tracking_code}"
 # per-parcel fields slot in without an options migration.
 CONF_PARCELS = "parcels"
 CONF_TRACKING_CODE = "tracking_code"
+CONF_CONTENTS = "contents"
 
 # Which way a parcel is going. Packeta is account-less and its payload cannot
 # tell the two apart — a C2C parcel the user sends and one they receive are

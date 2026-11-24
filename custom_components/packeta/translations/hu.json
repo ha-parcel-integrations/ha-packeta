@@ -74,6 +74,10 @@
         "direction": {
           "name": "Irány",
           "description": "Hogy ezt a csomagot kapod vagy te adtad fel. A Packeta követési adatai ezt nem tudják megkülönböztetni. A szolgáltatás ismételt hívása a másik iránnyal áthelyezi a már követett csomagot."
+        },
+        "contents": {
+          "name": "Tartalom",
+          "description": "Mi van a csomagban, saját szavaiddal. Egy követett csomagnál az újbóli meghívás lecseréli a tartalmat; az üres szöveg törli."
         }
       }
     },
@@ -84,6 +88,20 @@
         "tracking_code": {
           "name": "Követési kód",
           "description": "A Packeta követési kódja, amelynek a követését le kell állítani."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Csomag tartalmának frissítése",
+      "description": "Add meg saját szavaiddal, mi van a csomagban egy nyomkövetési kódhoz. Az üres szöveg törli a tartalmat.",
+      "fields": {
+        "tracking_code": {
+          "name": "Követési kód",
+          "description": "A Packeta követési kódja."
+        },
+        "contents": {
+          "name": "Tartalom",
+          "description": "Mi van a csomagban, saját szavaiddal. Az üres szöveg törli."
         }
       }
     }

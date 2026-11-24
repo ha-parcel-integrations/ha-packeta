@@ -74,6 +74,10 @@
         "direction": {
           "name": "Směr",
           "description": "Zda zásilku přijímáte, nebo odesíláte. Sledovací data Packety to nerozliší. Opětovné zavolání s opačným směrem už sledovanou zásilku přesune."
+        },
+        "contents": {
+          "name": "Obsah",
+          "description": "Co je v balíku, vlastními slovy. Opětovné volání pro sledovaný balík obsah nahradí; prázdný text jej smaže."
         }
       }
     },
@@ -84,6 +88,20 @@
         "tracking_code": {
           "name": "Sledovací kód",
           "description": "Sledovací kód Packety, u kterého se má sledování ukončit."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Aktualizovat obsah balíku",
+      "description": "Nastavte vlastními slovy, co je v balíku s daným sledovacím číslem. Prázdný text obsah smaže.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledovací kód",
+          "description": "Sledovací kód Packety."
+        },
+        "contents": {
+          "name": "Obsah",
+          "description": "Co je v balíku, vlastními slovy. Prázdný text jej smaže."
         }
       }
     }

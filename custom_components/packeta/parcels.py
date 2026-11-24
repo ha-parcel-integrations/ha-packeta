@@ -480,6 +480,7 @@ def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
         # name. Packeta never names the recipient.
         "sender": raw.get("sender") or None,
         "receiver": None,
+        "contents": None,
         "status": status,
         # The carrier's own status text, e.g. "The package is on its way" —
         # ``packetStatusId`` (the numeric code) drives the ``status`` mapping

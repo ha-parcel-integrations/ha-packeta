@@ -74,6 +74,10 @@
         "direction": {
           "name": "Kierunek",
           "description": "Czy odbierasz tę paczkę, czy ją wysyłasz. Dane śledzenia Packety nie rozróżniają tych dwóch przypadków. Ponowne wywołanie z drugim kierunkiem przenosi już śledzoną paczkę."
+        },
+        "contents": {
+          "name": "Zawartość",
+          "description": "Co jest w paczce, własnymi słowami. Ponowne wywołanie dla śledzonej paczki zastępuje zawartość; pusty tekst ją usuwa."
         }
       }
     },
@@ -84,6 +88,20 @@
         "tracking_code": {
           "name": "Kod śledzenia",
           "description": "Kod śledzenia Packety, dla którego ma zostać zatrzymane śledzenie."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Zaktualizuj zawartość paczki",
+      "description": "Ustaw własnymi słowami, co jest w paczce o danym numerze śledzenia. Pusty tekst usuwa zawartość.",
+      "fields": {
+        "tracking_code": {
+          "name": "Kod śledzenia",
+          "description": "Kod śledzenia Packety."
+        },
+        "contents": {
+          "name": "Zawartość",
+          "description": "Co jest w paczce, własnymi słowami. Pusty tekst ją usuwa."
         }
       }
     }

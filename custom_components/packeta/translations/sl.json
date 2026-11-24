@@ -74,6 +74,10 @@
         "direction": {
           "name": "Smer",
           "description": "Ali ta paket prejemaš ali ga pošiljaš. Sledilni podatki Packete tega ne razlikujejo. Ponoven klic z nasprotno smerjo premakne že sledeni paket."
+        },
+        "contents": {
+          "name": "Vsebina",
+          "description": "Kaj je v paketu, z lastnimi besedami. Ponoven klic za spremljan paket vsebino zamenja; prazno besedilo jo izbriše."
         }
       }
     },
@@ -84,6 +88,20 @@
         "tracking_code": {
           "name": "Sledilna koda",
           "description": "Sledilna koda Packete, ki ji želite prenehati slediti."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Posodobi vsebino paketa",
+      "description": "Z lastnimi besedami nastavite, kaj je v paketu s to sledilno kodo. Prazno besedilo vsebino izbriše.",
+      "fields": {
+        "tracking_code": {
+          "name": "Sledilna koda",
+          "description": "Sledilna koda Packete."
+        },
+        "contents": {
+          "name": "Vsebina",
+          "description": "Kaj je v paketu, z lastnimi besedami. Prazno besedilo jo izbriše."
         }
       }
     }

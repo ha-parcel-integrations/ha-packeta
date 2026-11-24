@@ -18,6 +18,7 @@ TO_REDACT = {
     "barcode",  # the tracking number
     "sender",
     "receiver",
+    "contents",
     "url",
     "pickup_point",
     # Packeta payload fields (``item``)
